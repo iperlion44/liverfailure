@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidDrink(data) {
+      return data.authorId is string
+        && data.name is string && data.name.size() > 0
+        && data.preparation is string && data.preparation.size() > 0
+        && data.ingredients is list && data.ingredients.size() > 0
+        && data.isPublic is bool;
+    }
+
+    match /drinks/{drinkId} {
+      // Pubblico se marcato tale, altrimenti visibile solo a chi l'ha scritto.
+      allow read: if resource.data.isPublic == true || isOwner(resource.data.authorId);
+
+      allow create: if isSignedIn()
+        && request.resource.data.authorId == request.auth.uid
+        && isValidDrink(request.resource.data);
+
+      // Solo l'autore modifica, e non può "regalare" la ricetta cambiando authorId.
+      allow update: if isOwner(resource.data.authorId)
+        && request.resource.data.authorId == resource.data.authorId
+        && isValidDrink(request.resource.data);
+
+      allow delete: if isOwner(resource.data.authorId);
+    }
+
+    match /users/{userId}/favorites/{drinkId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

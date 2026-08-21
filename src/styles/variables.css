@@ -1,0 +1,53 @@
+/* =========================================================
+   LIVERFAILURE — Design tokens
+   Direzione "Etichetta": fondo bianco, inchiostro nero,
+   un solo rosso amaro usato con parsimonia.
+========================================================= */
+
+:root {
+
+    /* --- Superfici --- */
+    --paper: #FFFFFF;
+    --paper-2: #F7F6F4;
+    --paper-3: #F0EEEA;
+
+    /* --- Inchiostro --- */
+    --ink: #111111;
+    --ink-2: #5B5B58;
+    --ink-3: #8C8B86;
+
+    /* --- Linee --- */
+    --rule: #E3E1DD;
+    --rule-2: #CFCCC6;
+
+    /* --- Accento: rosso amaro --- */
+    --bitter: #A32A22;
+    --bitter-dark: #7E1F19;
+    --bitter-tint: #FAF0EF;
+
+    /* --- Stato --- */
+    --danger: #A32A22;
+    --danger-tint: #FAF0EF;
+
+    /* --- Tipografia --- */
+    --font-display: "Bodoni Moda", "Times New Roman", Georgia, serif;
+    --font-body: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+    /* --- Forma --- */
+    --radius: 10px;
+    --radius-sm: 6px;
+    --radius-pill: 999px;
+
+    /* --- Ritmo --- */
+    --shell: 1200px;
+    --gutter: clamp(1.25rem, 4vw, 3rem);
+    --section: clamp(3.5rem, 8vw, 6.5rem);
+
+    /* --- Profondita' (usata pochissimo) --- */
+    --lift: 0 1px 2px rgba(17, 17, 17, 0.04),
+            0 12px 28px -18px rgba(17, 17, 17, 0.35);
+
+    /* --- Movimento --- */
+    --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
