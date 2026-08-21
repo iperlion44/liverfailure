@@ -55,11 +55,11 @@ function Home() {
 
                     <article className="tenet">
                         <span className="eyebrow eyebrow-bitter">Scrivi</span>
-                        <h2 className="tenet-title">Ingredienti a parole tue</h2>
+                        <h2 className="tenet-title">Ingredienti pronti, gesto tuo</h2>
                         <p className="tenet-body">
-                            Niente dosi obbligatorie, niente moduli infiniti:
-                            scrivi la ricetta come la racconteresti a chi hai
-                            dietro al bancone.
+                            Scegli alcolici, analcolici ed extra da liste
+                            già pronte, con le quantità in ml o a occhio.
+                            La preparazione la scrivi tu, a parole tue.
                         </p>
                     </article>
 

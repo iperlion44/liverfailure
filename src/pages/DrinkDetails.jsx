@@ -13,6 +13,7 @@ import {
     saveFavoriteLocally,
     writeCachedFavorites
 } from "../utils/favoritesStorage";
+import { readCachedMyDrinks } from "../utils/myDrinksStorage";
 import { showNotification } from "../utils/notifications";
 
 import { normalizeIngredients } from "../utils/drink";
@@ -52,25 +53,51 @@ function DrinkDetails() {
     // Fa disegnare il segno di conferma solo al click, mai al caricamento.
     const [justSaved, setJustSaved] = useState(false);
 
+    const [isCached, setIsCached] = useState(false);
+
     const { user } = useAuth();
 
     useEffect(() => {
+        const cachedDrink = user
+            ? readCachedFavorites(user.uid).find((favorite) => favorite.id === id) ??
+              readCachedMyDrinks(user.uid).find((myDrink) => myDrink.id === id)
+            : null;
+
         const fetchDrink = async () => {
             try {
+                if (!navigator.onLine) {
+                    throw new Error("Offline");
+                }
+
                 const snapshot = await getDoc(doc(db, "drinks", id));
 
                 if (snapshot.exists()) {
-                    setDrink({ id: snapshot.id, ...snapshot.data() });
+                    const data = snapshot.data();
+                    const isOwnerOfDrink = user && data.authorId === user.uid;
+
+                    if (data.isPublic !== false || isOwnerOfDrink) {
+                        setDrink({ id: snapshot.id, ...data });
+                        setIsCached(false);
+                    }
                 }
             } catch (error) {
                 console.error(error);
+
+                // Offline e senza il documento fresco: se il drink è tra i
+                // preferiti o tra i drink creati dall'utente e salvati
+                // localmente, mostriamo comunque quella copia invece della
+                // schermata "non esiste".
+                if (cachedDrink) {
+                    setDrink(cachedDrink);
+                    setIsCached(true);
+                }
             } finally {
                 setLoading(false);
             }
         };
 
         fetchDrink();
-    }, [id]);
+    }, [id, user]);
 
     const isSaved = useMemo(() => {
         if (override && override.id === id) {
@@ -198,6 +225,13 @@ function DrinkDetails() {
                 <p className="detail-author">Creato da {drink.authorName || "Sconosciuto"}</p>
                 {drink.description && <p className="detail-desc">{drink.description}</p>}
             </article>
+
+            {isCached && (
+                <div className="notice">
+                    Sei offline: stai leggendo la copia salvata sul
+                    dispositivo. Si aggiorna appena torni online.
+                </div>
+            )}
 
             <div className="recipe">
                 <section>

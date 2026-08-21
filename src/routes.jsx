@@ -7,6 +7,7 @@ import Explore from "./pages/Explore";
 import MyDrinks from "./pages/MyDrinks";
 import Favorites from "./pages/Favorites";
 import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
 import CreateDrink from "./pages/CreateDrink";
 import EditDrink from "./pages/EditDrink";
 import DrinkDetails from "./pages/DrinkDetails";
@@ -31,6 +32,7 @@ function AppRoutes() {
                         <Route path="/my-drinks" element={<MyDrinks />} />
                         <Route path="/favorites" element={<Favorites />} />
                         <Route path="/profile" element={<Profile />} />
+                        <Route path="/profile/edit" element={<EditProfile />} />
                         <Route path="/create-drink" element={<CreateDrink />} />
                         <Route path="/edit-drink/:id" element={<EditDrink />} />
                     </Route>

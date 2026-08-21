@@ -10,12 +10,14 @@ import db from "../firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { readCachedFavorites } from "../utils/favoritesStorage";
 import { initialOf } from "../utils/drink";
+import { fetchProfilePhoto } from "../utils/userProfile";
 
 function Profile() {
     const { user } = useAuth();
     const navigate = useNavigate();
 
     const [stats, setStats] = useState(null);
+    const [photoURL, setPhotoURL] = useState("");
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -47,6 +49,16 @@ function Profile() {
         fetchStats();
     }, [user]);
 
+    useEffect(() => {
+        if (!user) {
+            return;
+        }
+
+        fetchProfilePhoto(user.uid)
+            .then(setPhotoURL)
+            .catch((photoError) => console.error(photoError));
+    }, [user]);
+
     const handleLogout = async () => {
         try {
             await signOut(auth);
@@ -73,9 +85,15 @@ function Profile() {
             )}
 
             <section className="profile-card">
-                <span className="avatar" aria-hidden="true">
-                    {initialOf(user)}
-                </span>
+                {photoURL ? (
+                    <span className="avatar">
+                        <img className="avatar-photo" src={photoURL} alt="" />
+                    </span>
+                ) : (
+                    <span className="avatar" aria-hidden="true">
+                        {initialOf(user)}
+                    </span>
+                )}
 
                 <div>
                     <p className="profile-name">{user?.displayName || "Senza nome"}</p>
@@ -101,6 +119,9 @@ function Profile() {
             </section>
 
             <div className="form-actions">
+                <Link to="/profile/edit" className="btn btn-primary">
+                    Modifica profilo
+                </Link>
                 <Link to="/my-drinks" className="btn btn-outline">
                     Gestisci i tuoi drink
                 </Link>

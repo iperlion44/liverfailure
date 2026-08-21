@@ -10,6 +10,7 @@ import DrinkCard from "../components/DrinkCard";
 import EmptyState from "../components/EmptyState";
 import { DrinkGridSkeleton } from "../components/Loader";
 import { removeFavoriteLocally } from "../utils/favoritesStorage";
+import { readCachedMyDrinks, writeCachedMyDrinks } from "../utils/myDrinksStorage";
 
 function MyDrinks() {
     const { user } = useAuth();
@@ -17,6 +18,7 @@ function MyDrinks() {
     const [drinks, setDrinks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [isCached, setIsCached] = useState(false);
 
     const handleDelete = async (drinkId, drinkName) => {
         const confirmDelete = window.confirm(
@@ -35,7 +37,11 @@ function MyDrinks() {
                 console.error(error);
             });
 
-            setDrinks((previousDrinks) => previousDrinks.filter((drink) => drink.id !== drinkId));
+            setDrinks((previousDrinks) => {
+                const nextDrinks = previousDrinks.filter((drink) => drink.id !== drinkId);
+                writeCachedMyDrinks(user.uid, nextDrinks);
+                return nextDrinks;
+            });
         } catch (error) {
             console.error(error);
             setError("Non è stato possibile eliminare il drink. Riprova.");
@@ -44,7 +50,17 @@ function MyDrinks() {
 
     useEffect(() => {
         const fetchMyDrinks = async () => {
+            const cachedDrinks = readCachedMyDrinks(user.uid);
+
+            if (cachedDrinks.length > 0) {
+                setDrinks(cachedDrinks);
+            }
+
             try {
+                if (!navigator.onLine) {
+                    throw new Error("Offline");
+                }
+
                 const drinksQuery = query(
                     collection(db, "drinks"),
                     where("authorId", "==", user.uid)
@@ -57,9 +73,17 @@ function MyDrinks() {
                 }));
 
                 setDrinks(drinksList);
+                setIsCached(false);
+                writeCachedMyDrinks(user.uid, drinksList);
             } catch (error) {
                 console.error(error);
-                setError("Non è stato possibile caricare i tuoi drink. Controlla la connessione e riprova.");
+
+                if (cachedDrinks.length > 0) {
+                    setDrinks(cachedDrinks);
+                    setIsCached(true);
+                } else {
+                    setError("Non è stato possibile caricare i tuoi drink. Controlla la connessione e riprova.");
+                }
             } finally {
                 setLoading(false);
             }
@@ -88,6 +112,13 @@ function MyDrinks() {
                     </span>
                 )}
             </header>
+
+            {isCached && drinks.length > 0 && (
+                <div className="notice">
+                    Sei offline: stai leggendo la copia salvata sul
+                    dispositivo. Si aggiorna appena torni online.
+                </div>
+            )}
 
             {error && (
                 <div className="notice notice-error" role="alert">

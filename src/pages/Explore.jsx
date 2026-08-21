@@ -34,6 +34,7 @@ function Explore() {
     const [drinks, setDrinks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [isOffline, setIsOffline] = useState(false);
     const [search, setSearch] = useState("");
     const [selectedSpirits, setSelectedSpirits] = useState([]);
     const [analcolicoOnly, setAnalcolicoOnly] = useState(false);
@@ -47,6 +48,15 @@ function Explore() {
             try {
                 setLoading(true);
                 setError("");
+                setIsOffline(false);
+
+                // Esplora mostra solo la libreria condivisa, senza copia in
+                // cache: da offline non ha niente di affidabile da
+                // mostrare, quindi si ferma qui e lo dice chiaramente,
+                // invece di tentare la richiesta.
+                if (!navigator.onLine) {
+                    throw new Error("Offline");
+                }
 
                 const querySnapshot = await getDocs(
                     query(collection(db, "drinks"), where("isPublic", "==", true))
@@ -79,7 +89,12 @@ function Explore() {
                 setDrinks(drinksList);
             } catch (error) {
                 console.error(error);
-                setError("Non è stato possibile caricare la libreria. Controlla la connessione e riprova.");
+
+                if (!navigator.onLine) {
+                    setIsOffline(true);
+                } else {
+                    setError("Non è stato possibile caricare la libreria. Controlla la connessione e riprova.");
+                }
             } finally {
                 setLoading(false);
             }
@@ -137,7 +152,7 @@ function Explore() {
                     </p>
                 </div>
 
-                {!loading && !error && (
+                {!loading && !error && !isOffline && (
                     <span className="count">
                         {search.trim() || selectedSpirits.length > 0 || analcolicoOnly
                             ? `${filteredDrinks.length} di ${drinks.length} drink`
@@ -146,21 +161,23 @@ function Explore() {
                 )}
             </header>
 
-            <div className="search">
-                <span className="search-icon">
-                    <SearchIcon />
-                </span>
-                <input
-                    type="search"
-                    className="search-input"
-                    placeholder="Cerca per nome"
-                    aria-label="Cerca un drink per nome"
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                />
-            </div>
+            {!isOffline && (
+                <div className="search">
+                    <span className="search-icon">
+                        <SearchIcon />
+                    </span>
+                    <input
+                        type="search"
+                        className="search-input"
+                        placeholder="Cerca per nome"
+                        aria-label="Cerca un drink per nome"
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                    />
+                </div>
+            )}
 
-            {!loading && !error && drinks.length > 0 && (
+            {!loading && !error && !isOffline && drinks.length > 0 && (
                 <div className="spirit-filters">
                     <button
                         type="button"
@@ -186,13 +203,28 @@ function Explore() {
 
             {loading && <DrinkGridSkeleton />}
 
-            {!loading && error && (
+            {!loading && isOffline && (
+                <EmptyState
+                    eyebrow="Sei offline"
+                    title="Esplora richiede una connessione"
+                    body="La libreria condivisa non è salvata sul dispositivo. Torna online per sfogliarla: nel frattempo trovi i tuoi preferiti e i tuoi drink anche offline."
+                >
+                    <Link to="/favorites" className="btn btn-outline">
+                        Vai ai preferiti
+                    </Link>
+                    <Link to="/my-drinks" className="btn btn-outline">
+                        Vai ai miei drink
+                    </Link>
+                </EmptyState>
+            )}
+
+            {!loading && !isOffline && error && (
                 <div className="notice notice-error" role="alert">
                     {error}
                 </div>
             )}
 
-            {!loading && !error && drinks.length === 0 && (
+            {!loading && !isOffline && !error && drinks.length === 0 && (
                 <EmptyState
                     eyebrow="Libreria vuota"
                     title="Non c'è ancora niente da bere"
@@ -204,7 +236,7 @@ function Explore() {
                 </EmptyState>
             )}
 
-            {!loading && !error && drinks.length > 0 && filteredDrinks.length === 0 && (
+            {!loading && !isOffline && !error && drinks.length > 0 && filteredDrinks.length === 0 && (
                 <EmptyState
                     eyebrow="Nessun risultato"
                     title={
@@ -233,7 +265,7 @@ function Explore() {
                 </EmptyState>
             )}
 
-            {!loading && !error && filteredDrinks.length > 0 && (
+            {!loading && !isOffline && !error && filteredDrinks.length > 0 && (
                 <div className="drink-grid">
                     {filteredDrinks.map((drink) => (
                         <Link to={`/drink/${drink.id}`} key={drink.id}>

@@ -14,6 +14,8 @@ body {
     background: var(--paper);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
 }
 
 ::selection {
@@ -151,6 +153,7 @@ img {
     background: rgba(255, 255, 255, 0.92);
     backdrop-filter: saturate(1.6) blur(10px);
     border-bottom: 1px solid var(--rule);
+    padding-top: env(safe-area-inset-top);
 }
 
 .site-header-inner {
@@ -249,7 +252,7 @@ img {
 .site-footer {
     margin-top: var(--section);
     border-top: 1px solid var(--rule);
-    padding-block: 2rem 2.5rem;
+    padding-block: 2rem max(2.5rem, env(safe-area-inset-bottom));
 }
 
 .site-footer-inner {
@@ -500,6 +503,10 @@ img {
     flex-shrink: 0;
 }
 
+.image-picker-preview-round {
+    border-radius: 50%;
+}
+
 .image-picker-actions {
     display: flex;
     flex-wrap: wrap;
@@ -696,7 +703,7 @@ img {
 /* Tre principi, non tre riquadri di funzionalita */
 .tenets {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    grid-template-columns: 1fr;
     gap: 1px;
     background: var(--rule);
     border: 1px solid var(--rule);
@@ -868,15 +875,23 @@ img {
     transition: transform 0.28s var(--ease);
 }
 
-a:hover > .drink-card,
-.drink-card:hover {
-    border-color: var(--rule-2);
-    box-shadow: var(--lift);
-    transform: translateY(-2px);
+/* Il sollevamento resta un gesto del mouse: su touch, senza :hover che
+   si stacca al tocco, la carta rimarrebbe sollevata dopo ogni tap. */
+@media (hover: hover) {
+    a:hover > .drink-card,
+    .drink-card:hover {
+        border-color: var(--rule-2);
+        box-shadow: var(--lift);
+        transform: translateY(-2px);
+    }
+
+    a:hover > .drink-card::before,
+    .drink-card:hover::before {
+        transform: scaleX(2);
+    }
 }
 
-a:hover > .drink-card::before,
-.drink-card:hover::before {
+.drink-card:active::before {
     transform: scaleX(2);
 }
 
@@ -1156,7 +1171,7 @@ a:hover > .drink-card::before,
     min-height: 100vh;
     display: grid;
     place-items: center;
-    padding: 2rem 1.25rem;
+    padding: max(2rem, env(safe-area-inset-top)) 1.25rem max(2rem, env(safe-area-inset-bottom));
     background: var(--paper-2);
 }
 
@@ -1264,8 +1279,17 @@ a:hover > .drink-card::before,
     transition: transform 0.18s var(--ease);
 }
 
-.avatar-sm:hover {
-    transform: scale(1.07);
+.avatar-photo {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+@media (hover: hover) {
+    .avatar-sm:hover {
+        transform: scale(1.07);
+    }
 }
 
 .profile-name {
@@ -1273,6 +1297,7 @@ a:hover > .drink-card::before,
     font-size: 1.5rem;
     font-weight: 500;
     line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 
 .profile-email {
@@ -1284,7 +1309,7 @@ a:hover > .drink-card::before,
 
 .stat-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 1px;
     background: var(--rule);
     border: 1px solid var(--rule);
@@ -1295,12 +1320,12 @@ a:hover > .drink-card::before,
 
 .stat {
     background: var(--paper);
-    padding: 1.25rem 1.4rem;
+    padding: 1.25rem clamp(0.75rem, 4vw, 1.4rem);
 }
 
 .stat-value {
     font-family: var(--font-display);
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 6vw, 2rem);
     font-weight: 500;
     line-height: 1;
     margin-bottom: 0.45rem;
@@ -1470,6 +1495,10 @@ a:hover > .drink-card::before,
     .nav-actions-mobile {
         display: none;
     }
+
+    .tenets {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 @media (max-width: 560px) {
@@ -1488,6 +1517,35 @@ a:hover > .drink-card::before,
     .form-actions .btn,
     .detail-actions .btn {
         width: 100%;
+    }
+
+    .detail-image {
+        max-height: 240px;
+    }
+}
+
+/* L'input punta il dito, non il mouse: bersagli più grandi a prescindere
+   dalla larghezza dello schermo (un laptop touch resta a schermo largo). */
+@media (pointer: coarse) {
+
+    .nav-toggle {
+        width: 44px;
+        height: 44px;
+    }
+
+    .avatar-sm {
+        width: 44px;
+        height: 44px;
+        font-size: 1.05rem;
+    }
+
+    .spirit-chip {
+        padding: 0.65rem 1.05rem;
+    }
+
+    .back-link {
+        padding-block: 0.5rem;
+        margin-block: -0.5rem 1.5rem;
     }
 }
 

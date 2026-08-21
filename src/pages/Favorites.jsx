@@ -56,18 +56,26 @@ function Favorites() {
                             return { id: favorite.id, drink: null };
                         }
 
+                        const data = drinkSnapshot.data();
+                        const isOwnerOfDrink = data.authorId === user.uid;
+
+                        if (data.isPublic === false && !isOwnerOfDrink) {
+                            return { id: favorite.id, drink: null };
+                        }
+
                         return {
                             id: favorite.id,
-                            drink: { id: drinkSnapshot.id, ...drinkSnapshot.data() }
+                            drink: { id: drinkSnapshot.id, ...data }
                         };
                     })
                 );
 
                 const validDrinks = results.filter((result) => result.drink).map((result) => result.drink);
 
-                // Il drink è stato eliminato ma il riferimento ai preferiti
-                // è rimasto: lo togliamo da Firestore e dalla cache locale,
-                // invece di lasciarlo riapparire ad ogni merge.
+                // Il drink è stato eliminato, oppure reso privato da chi
+                // non è l'autore, ma il riferimento ai preferiti è rimasto:
+                // lo togliamo da Firestore e dalla cache locale, invece di
+                // lasciarlo riapparire ad ogni merge.
                 const staleIds = results.filter((result) => !result.drink).map((result) => result.id);
 
                 if (staleIds.length > 0) {
