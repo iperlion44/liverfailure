@@ -44,13 +44,13 @@ function DrinkDetails() {
     const [drink, setDrink] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Scavalca la copia in cache appena l'utente tocca il bottone, così
+    // Sovrascrive lo stato letto da cache appena l'utente clicca, così
     // l'interfaccia risponde subito senza rileggere localStorage.
     const [override, setOverride] = useState(null);
 
     const [notice, setNotice] = useState("");
 
-    // Fa disegnare il segno di conferma solo al click, mai al caricamento.
+    // Disegna il segno di conferma solo al click, non al caricamento.
     const [justSaved, setJustSaved] = useState(false);
 
     const [isCached, setIsCached] = useState(false);
@@ -83,10 +83,9 @@ function DrinkDetails() {
             } catch (error) {
                 console.error(error);
 
-                // Offline e senza il documento fresco: se il drink è tra i
-                // preferiti o tra i drink creati dall'utente e salvati
-                // localmente, mostriamo comunque quella copia invece della
-                // schermata "non esiste".
+                // Niente documento fresco: se il drink è salvato localmente
+                // (preferiti o miei drink) mostriamo quella copia invece
+                // della schermata "non esiste".
                 if (cachedDrink) {
                     setDrink(cachedDrink);
                     setIsCached(true);

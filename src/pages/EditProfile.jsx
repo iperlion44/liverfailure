@@ -114,8 +114,8 @@ function EditProfile() {
                 await updatePassword(auth.currentUser, newPassword);
             }
 
-            // Ricarica la pagina (invece di una navigazione client-side) così
-            // l'avatar in navbar, letto una sola volta al login, si aggiorna.
+            // Ricarico la pagina invece di navigare via router: l'avatar in
+            // navbar viene letto solo al login e non si aggiornerebbe da solo.
             window.location.href = "/profile";
         } catch (submitError) {
             console.error(submitError);

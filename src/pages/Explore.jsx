@@ -52,10 +52,8 @@ function Explore() {
                 setError("");
                 setIsOffline(false);
 
-                // Esplora mostra solo la libreria condivisa, senza copia in
-                // cache: da offline non ha niente di affidabile da
-                // mostrare, quindi si ferma qui e lo dice chiaramente,
-                // invece di tentare la richiesta.
+                // Nessuna cache per la libreria condivisa: da offline non
+                // c'è niente di affidabile da mostrare.
                 if (!navigator.onLine) {
                     throw new Error("Offline");
                 }

@@ -86,9 +86,9 @@ export function removeFavoriteLocally(uid, drinkId) {
 export function mergeFavorites(remoteFavorites = [], localFavorites = []) {
     const map = new Map();
 
-    // I dati remoti sono più aggiornati, quindi vanno inseriti per ultimi
-    // così sovrascrivono la copia in cache. Gli id presenti solo in locale
-    // (preferiti aggiunti offline non ancora sincronizzati) restano invariati.
+    // I dati remoti sono più aggiornati e vanno inseriti per ultimi, così
+    // sovrascrivono la cache. Gli id presenti solo in locale (preferiti
+    // aggiunti offline, non ancora sincronizzati) restano invariati.
     [...localFavorites, ...remoteFavorites].forEach((drink) => {
         if (!drink || !drink.id) {
             return;

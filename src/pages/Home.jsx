@@ -16,13 +16,13 @@ function Home() {
                     <span className="eyebrow hero-eyebrow">Ricettario condiviso</span>
 
                     <h1 className="display display-xl hero-title">
-                        Il drink si beve una volta. La ricetta resta.
+                        Le ricette dei drink che prepariamo davvero
                     </h1>
 
                     <p className="lede hero-lede">
-                        Una libreria di ricette scritte da chi le beve
-                        davvero. Cerca quello che ti serve, salva quello
-                        che ti convince, scrivi quello che manca.
+                        Una raccolta di ricette scritte da chi i drink
+                        li beve per davvero. Cerca quella che ti serve,
+                        o aggiungi quella che manca.
                     </p>
 
                     <div className="hero-actions">
@@ -38,7 +38,7 @@ function Home() {
                         <span className="eyebrow">
                             {user
                                 ? `Accesso come ${user.displayName || user.email}`
-                                : "Sfogliare è libero. Per pubblicare serve un account."}
+                                : "Puoi sfogliare senza account. Per pubblicare invece serve registrarsi."}
                         </span>
                     </div>
                 </div>
@@ -48,21 +48,21 @@ function Home() {
                 <section className="tenets">
                     <article className="tenet">
                         <span className="eyebrow eyebrow-bitter">Esplora</span>
-                        <h2 className="tenet-title">Prima si cerca, poi si beve</h2>
+                        <h2 className="tenet-title">Cerca la ricetta giusta</h2>
                         <p className="tenet-body">
-                            Tutti i drink pubblici stanno in un unico posto,
-                            con il nome di chi li ha scritti. Si cerca per
-                            nome, si apre la ricetta, si beve in pace.
+                            Tutti i drink pubblici sono in un unico posto,
+                            con il nome di chi li ha scritti. Cerca per
+                            nome e apri la ricetta.
                         </p>
                     </article>
 
                     <article className="tenet">
                         <span className="eyebrow eyebrow-bitter">Scrivi</span>
-                        <h2 className="tenet-title">Ingredienti pronti, gesto tuo</h2>
+                        <h2 className="tenet-title">Componi la ricetta</h2>
                         <p className="tenet-body">
                             Scegli alcolici, analcolici ed extra da liste
-                            già pronte, con le quantità in ml o a occhio.
-                            La preparazione la scrivi tu, a parole tue.
+                            già pronte, con le quantità in ml o a occhio,
+                            e scrivi tu la preparazione.
                         </p>
                     </article>
 
@@ -70,9 +70,9 @@ function Home() {
                         <span className="eyebrow eyebrow-bitter">Porta con te</span>
                         <h2 className="tenet-title">Funziona anche offline</h2>
                         <p className="tenet-body">
-                            Installa LiverFailure sul telefono: i preferiti
-                            restano leggibili anche quando la connessione
-                            sparisce a metà serata.
+                            Installa LiverFailure sul telefono: i tuoi
+                            preferiti restano leggibili anche se la
+                            connessione salta a metà serata.
                         </p>
                     </article>
                 </section>

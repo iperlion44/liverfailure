@@ -1,8 +1,6 @@
 import { countIngredients } from "../utils/drink";
 
-// Segnaposto per i drink senza foto: stesso tratto sottile delle altre
-// icone dell'interfaccia (coppa, non bicchiere generico) finche' la
-// libreria non si riempie di fotografie vere.
+// Placeholder per i drink senza foto
 function GlassMark() {
     return (
         <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">

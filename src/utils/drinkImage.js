@@ -16,8 +16,8 @@ export function validateDrinkImage(file) {
 }
 
 // Ridimensiona e comprime la foto lato client, poi la restituisce come
-// data URL: viene salvata direttamente nel documento del drink su
-// Firestore, senza bisogno di un servizio di storage separato.
+// data URL da salvare direttamente nel documento Firestore (niente
+// storage separato).
 export function readDrinkImage(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();

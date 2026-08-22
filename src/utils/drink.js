@@ -1,5 +1,4 @@
-// Testo libero: chi scrive va a capo o separa con la virgola, quindi
-// proviamo entrambi senza inventare dati che non ci sono.
+// Ricette vecchie: testo libero, a capo o separato da virgole.
 export function parseIngredients(rawIngredients) {
     if (!rawIngredients || typeof rawIngredients !== "string") {
         return [];
@@ -20,8 +19,8 @@ export function parseIngredients(rawIngredients) {
         .filter(Boolean);
 }
 
-// Ricette vecchie hanno una stringa libera come ingredienti, quelle nuove
-// un array di { name, quantity }: qui le normalizziamo alla stessa forma.
+// Le ricette vecchie hanno una stringa libera come ingredienti, quelle
+// nuove un array di { name, quantity }: qui uniformiamo alla stessa forma.
 export function normalizeIngredients(rawIngredients) {
     if (Array.isArray(rawIngredients)) {
         return rawIngredients
@@ -39,7 +38,7 @@ export function normalizeIngredients(rawIngredients) {
 }
 
 // Estrae la parte numerica da una quantità in ml ("50 ml" -> "50") per
-// rimetterla in un campo numerico quando si modifica una ricetta.
+// il campo numerico del form di modifica.
 export function extractMlValue(quantity) {
     if (!quantity) {
         return "";

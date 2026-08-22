@@ -87,7 +87,7 @@ img {
     padding-inline: var(--gutter);
 }
 
-/* Occhiello: mono maiuscolo spaziato, come il collarino di una bottiglia */
+/* Etichetta piccola sopra i titoli, mono maiuscolo spaziato */
 .eyebrow {
     display: block;
     font-family: var(--font-mono);
@@ -615,7 +615,7 @@ img {
 
 
 /* =========================================================
-   8. HOME — l etichetta come tesi
+   8. HOME
 ========================================================= */
 
 .hero {
@@ -700,7 +700,7 @@ img {
     to   { opacity: 1; transform: scaleX(1); }
 }
 
-/* Tre principi, non tre riquadri di funzionalita */
+/* Tre principi */
 .tenets {
     display: grid;
     grid-template-columns: 1fr;
@@ -719,7 +719,7 @@ img {
     animation: rise 0.6s var(--ease) both;
 }
 
-/* stesso segno del bancone che apre le drink-card e l'etichetta hero */
+/* stessa lineetta rossa usata sulle drink-card e nell'etichetta hero */
 .tenet::before {
     content: "";
     position: absolute;
@@ -754,9 +754,8 @@ img {
 
 /* =========================================================
    8bis. HOME — colonne di drink nei margini
-   Solo su schermi molto larghi esiste spazio bianco a lato
-   dello shell: li' scorrono le foto della libreria, a mo' di
-   invito silenzioso verso /explore.
+   Solo su schermi molto larghi c'e' spazio a lato dello shell:
+   li' scorrono le foto della libreria, come link verso /explore.
 ========================================================= */
 
 .marquee {
@@ -934,9 +933,7 @@ img {
     gap: 1.25rem;
 }
 
-/* Carta divisa in due: a sinistra la ricetta si legge, a destra si
-   guarda. La proporzione verticale nasce da sola, perche' la colonna
-   di testo e' stretta quanto quella della foto e ha piu' da dire. */
+/* Card divisa in due colonne: testo a sinistra, foto a destra */
 .drink-card {
     position: relative;
     display: grid;
@@ -958,9 +955,7 @@ img {
     padding: 1.6rem 1.35rem 1.35rem;
 }
 
-/* Il segno del bancone ora vive sulla piega: una piccola linguetta
-   rossa in cima alla riga che separa parole e immagine, la stessa
-   che apriva le carte prima dello split. */
+/* Linguetta rossa sulla piega tra testo e foto */
 .drink-card::before {
     content: "";
     position: absolute;
@@ -975,8 +970,8 @@ img {
     z-index: 1;
 }
 
-/* Il sollevamento resta un gesto del mouse: su touch, senza :hover che
-   si stacca al tocco, la carta rimarrebbe sollevata dopo ogni tap. */
+/* Solo con mouse: su touch :hover non si stacca al tocco e la carta
+   resterebbe sollevata dopo ogni tap. */
 @media (hover: hover) {
     a:hover > .drink-card,
     .drink-card:hover {
@@ -1252,7 +1247,7 @@ img {
     color: #fff;
 }
 
-/* Il gesto di conferma: un unico tratto, come firmare l'etichetta */
+/* Segno di spunta animato al salvataggio nei preferiti */
 .fav-mark {
     display: inline-flex;
     flex-shrink: 0;
@@ -1664,8 +1659,8 @@ img {
         max-width: 260px;
     }
 
-    /* La colonna di testo si stringe parecchio sotto i 560px: meno
-       padding e un titolo piu' piccolo la tengono leggibile. */
+    /* Sotto i 560px la colonna di testo si stringe: meno padding e
+       titolo piu' piccolo per restare leggibile. */
     .drink-card-body {
         padding: 1.25rem 1rem 1.1rem;
     }
@@ -1686,8 +1681,8 @@ img {
     }
 }
 
-/* L'input punta il dito, non il mouse: bersagli più grandi a prescindere
-   dalla larghezza dello schermo (un laptop touch resta a schermo largo). */
+/* Bersagli più grandi su input touch, a prescindere dalla larghezza
+   schermo (un laptop touch resta a schermo largo). */
 @media (pointer: coarse) {
 
     .nav-toggle {

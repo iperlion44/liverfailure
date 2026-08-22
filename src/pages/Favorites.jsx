@@ -72,10 +72,9 @@ function Favorites() {
 
                 const validDrinks = results.filter((result) => result.drink).map((result) => result.drink);
 
-                // Il drink è stato eliminato, oppure reso privato da chi
-                // non è l'autore, ma il riferimento ai preferiti è rimasto:
-                // lo togliamo da Firestore e dalla cache locale, invece di
-                // lasciarlo riapparire ad ogni merge.
+                // Drink eliminato o reso privato da chi non è l'autore, ma
+                // il riferimento ai preferiti è rimasto: lo rimuoviamo da
+                // Firestore e dalla cache locale.
                 const staleIds = results.filter((result) => !result.drink).map((result) => result.id);
 
                 if (staleIds.length > 0) {
@@ -139,8 +138,8 @@ function Favorites() {
             {!loading && favorites.length === 0 && (
                 <EmptyState
                     eyebrow="Nessun preferito"
-                    title="Qui finisce quello che rifarai"
-                    body="Apri un drink in Esplora e salvalo: lo ritrovi qui, anche a connessione assente."
+                    title="Non hai ancora salvato niente"
+                    body="Apri un drink in Esplora e salvalo: lo ritrovi qui, anche senza connessione."
                 >
                     <Link to="/explore" className="btn btn-primary">
                         Vai a Esplora

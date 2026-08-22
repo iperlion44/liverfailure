@@ -2,9 +2,8 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 
 import db from "../firebase/firestore";
 
-// La foto profilo va in Firestore (come data URL) e non nel campo
-// photoURL di Firebase Auth, che ha un limite di lunghezza troppo
-// basso per contenere un'immagine incorporata.
+// Salvata in Firestore come data URL: il campo photoURL di Firebase
+// Auth ha un limite di lunghezza troppo basso per un'immagine inline.
 export async function fetchProfilePhoto(uid) {
     if (!uid) {
         return "";

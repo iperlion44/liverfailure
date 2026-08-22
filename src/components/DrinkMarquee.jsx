@@ -5,8 +5,8 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 
 import db from "../firebase/firestore";
 
-// Sotto questa soglia il loop verticale si vedrebbe ripetere troppo in
-// fretta: meglio non mostrare la colonna che mostrarla povera.
+// Con poche immagini il loop si ripete troppo in fretta: meglio
+// nascondere la colonna che mostrarla povera.
 const MIN_IMAGES = 6;
 
 function shuffle(items) {
@@ -25,9 +25,8 @@ function splitAlternating(items) {
     const left = [];
     const right = [];
 
-    // Si mischia prima di alternare: cosi' ogni refresh manda una
-    // foto a destra o a sinistra in modo diverso dal caricamento
-    // precedente, invece di ripetere sempre la stessa suddivisione.
+    // Si mischia prima di alternare, cosi' la suddivisione tra le
+    // due colonne cambia ad ogni refresh.
     shuffle(items).forEach((item, index) => {
         (index % 2 === 0 ? left : right).push(item);
     });
@@ -35,15 +34,14 @@ function splitAlternating(items) {
     return [left, right];
 }
 
-// Secondi di scroll per immagine: piu' foto ci sono, piu' lungo il
-// giro, cosi' la velocita' percepita resta la stessa a prescindere
-// da quante finiscono in ciascuna colonna.
+// Durata proporzionale al numero di immagini, cosi' la velocita'
+// percepita resta la stessa in ogni colonna.
 const SECONDS_PER_IMAGE = 6;
 
 function MarqueeColumn({ drinks, direction }) {
-    // Il loop e' senza soluzione di continuita' solo raddoppiando la
-    // lista e traslando del 50%: la seconda copia prende il posto
-    // esatto della prima quando l'animazione riparte.
+    // Lista raddoppiata + traslazione del 50%: la seconda copia
+    // prende il posto della prima quando l'animazione riparte,
+    // dando un loop senza scatti.
     const track = [...drinks, ...drinks];
     const duration = `${drinks.length * SECONDS_PER_IMAGE}s`;
 
@@ -93,8 +91,8 @@ function DrinkMarquee() {
                     setDrinks(withImages);
                 }
             } catch (error) {
-                // Decorativa: se fallisce, la home resta comunque
-                // utilizzabile, semplicemente senza le colonne.
+                // Decorativa: se fallisce la home resta utilizzabile,
+                // solo senza le colonne.
                 console.error(error);
             }
         };
