@@ -1,12 +1,15 @@
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
+import DrinkMarquee from "../components/DrinkMarquee";
 
 function Home() {
     const { user } = useAuth();
 
     return (
         <>
+            <DrinkMarquee />
+
             <section className="shell hero">
                 <div className="hero-label">
                     <span className="hero-mark" />

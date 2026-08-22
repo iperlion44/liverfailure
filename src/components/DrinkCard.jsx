@@ -1,14 +1,28 @@
 import { countIngredients } from "../utils/drink";
 
+// Segnaposto per i drink senza foto: stesso tratto sottile delle altre
+// icone dell'interfaccia (coppa, non bicchiere generico) finche' la
+// libreria non si riempie di fotografie vere.
+function GlassMark() {
+    return (
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+            <path
+                d="M8 5.5 H22 L15.9 15 V23.5 M15.9 15 L9 5.5"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            <path d="M11.5 24.5 H20.3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </svg>
+    );
+}
+
 function DrinkCard({ drink, showStatus = false, children }) {
     const ingredientCount = countIngredients(drink.ingredients);
 
     return (
         <article className="drink-card">
-            {drink.image && (
-                <img className="drink-card-image" src={drink.image} alt="" loading="lazy" />
-            )}
-
             <div className="drink-card-body">
                 <h2 className="drink-card-name">{drink.name || "Senza nome"}</h2>
 
@@ -38,6 +52,16 @@ function DrinkCard({ drink, showStatus = false, children }) {
                 </div>
 
                 {children}
+            </div>
+
+            <div className="drink-card-photo">
+                {drink.image ? (
+                    <img className="drink-card-image" src={drink.image} alt="" loading="lazy" />
+                ) : (
+                    <div className="drink-card-photo-empty">
+                        <GlassMark />
+                    </div>
+                )}
             </div>
         </article>
     );

@@ -752,6 +752,97 @@ img {
     line-height: 1.6;
 }
 
+/* =========================================================
+   8bis. HOME — colonne di drink nei margini
+   Solo su schermi molto larghi esiste spazio bianco a lato
+   dello shell: li' scorrono le foto della libreria, a mo' di
+   invito silenzioso verso /explore.
+========================================================= */
+
+.marquee {
+    display: none;
+}
+
+@media (min-width: 1500px) {
+    .marquee {
+        display: block;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: calc((100vw - var(--shell)) / 2);
+        overflow: hidden;
+        z-index: 1;
+        -webkit-mask-image: linear-gradient(
+            to bottom,
+            transparent 0,
+            #000 120px,
+            #000 calc(100% - 120px),
+            transparent 100%
+        );
+        mask-image: linear-gradient(
+            to bottom,
+            transparent 0,
+            #000 120px,
+            #000 calc(100% - 120px),
+            transparent 100%
+        );
+    }
+
+    .marquee-left {
+        left: 0;
+    }
+
+    .marquee-right {
+        right: 0;
+    }
+}
+
+.marquee-track {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    width: 108px;
+    margin-inline: auto;
+    padding-block: 1.25rem;
+    will-change: transform;
+}
+
+.marquee-track-down {
+    animation: marquee-down var(--marquee-duration, 60s) linear infinite;
+}
+
+.marquee-track-up {
+    animation: marquee-up var(--marquee-duration, 60s) linear infinite;
+}
+
+.marquee-image {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--rule-2);
+    filter: grayscale(0.25);
+    flex-shrink: 0;
+}
+
+@keyframes marquee-down {
+    from { transform: translateY(-50%); }
+    to   { transform: translateY(0); }
+}
+
+@keyframes marquee-up {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marquee-track-down,
+    .marquee-track-up {
+        animation: none;
+    }
+}
+
 
 /* =========================================================
    9. RICERCA
@@ -838,15 +929,19 @@ img {
 
 .drink-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     align-items: start;
     gap: 1.25rem;
 }
 
+/* Carta divisa in due: a sinistra la ricetta si legge, a destra si
+   guarda. La proporzione verticale nasce da sola, perche' la colonna
+   di testo e' stretta quanto quella della foto e ha piu' da dire. */
 .drink-card {
     position: relative;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 420px;
     background: var(--paper);
     border: 1px solid var(--rule);
     border-radius: var(--radius);
@@ -859,20 +954,25 @@ img {
 .drink-card-body {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    padding: 1.5rem 1.5rem 1.35rem;
+    min-width: 0;
+    padding: 1.6rem 1.35rem 1.35rem;
 }
 
+/* Il segno del bancone ora vive sulla piega: una piccola linguetta
+   rossa in cima alla riga che separa parole e immagine, la stessa
+   che apriva le carte prima dello split. */
 .drink-card::before {
     content: "";
     position: absolute;
     top: 0;
-    left: 1.5rem;
-    width: 28px;
-    height: 1.5px;
+    left: 50%;
+    width: 1.5px;
+    height: 22px;
     background: var(--bitter);
-    transform-origin: left;
+    transform: translateX(-50%);
+    transform-origin: top;
     transition: transform 0.28s var(--ease);
+    z-index: 1;
 }
 
 /* Il sollevamento resta un gesto del mouse: su touch, senza :hover che
@@ -887,25 +987,42 @@ img {
 
     a:hover > .drink-card::before,
     .drink-card:hover::before {
-        transform: scaleX(2);
+        transform: translateX(-50%) scaleY(1.9);
     }
 }
 
 .drink-card:active::before {
-    transform: scaleX(2);
+    transform: translateX(-50%) scaleY(1.9);
+}
+
+.drink-card-photo {
+    position: relative;
+    border-left: 1px solid var(--rule);
 }
 
 .drink-card-image {
     display: block;
     width: 100%;
-    height: 160px;
+    height: 100%;
+    min-height: 220px;
     object-fit: cover;
     object-position: center;
 }
 
+.drink-card-photo-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 220px;
+    background: var(--paper-2);
+    color: var(--rule-2);
+}
+
 .drink-card-name {
     font-family: var(--font-display);
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 500;
     line-height: 1.15;
     letter-spacing: -0.01em;
@@ -914,12 +1031,12 @@ img {
 }
 
 .drink-card-desc {
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     color: var(--ink-2);
     line-height: 1.55;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 6;
+    line-clamp: 6;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -929,7 +1046,8 @@ img {
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem 0.75rem;
-    margin-top: 1.25rem;
+    margin-top: auto;
+    padding-top: 1.25rem;
     font-family: var(--font-mono);
     font-size: 0.66rem;
     letter-spacing: 0.14em;
@@ -1010,12 +1128,14 @@ img {
 }
 
 .detail-image {
+    display: block;
     width: 100%;
-    max-height: 420px;
+    max-width: 360px;
+    aspect-ratio: 3 / 4;
     object-fit: cover;
     border-radius: var(--radius-sm);
     border: 1px solid var(--rule-2);
-    margin-bottom: 2rem;
+    margin: 0 auto 2rem;
 }
 
 .detail-label {
@@ -1382,12 +1502,33 @@ img {
     color: var(--bitter-dark);
 }
 
-/* Scheletri di caricamento */
+/* Scheletri di caricamento — stesso split testo/foto della carta vera */
 .skeleton-card {
-    min-height: 210px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 260px;
+    max-width: 420px;
     border: 1px solid var(--rule);
     border-radius: var(--radius);
-    padding: 1.5rem;
+    overflow: hidden;
+}
+
+.skeleton-card-text {
+    display: flex;
+    flex-direction: column;
+    padding: 1.6rem 1.35rem;
+}
+
+.skeleton-card-photo {
+    border-left: 1px solid var(--rule);
+    background: linear-gradient(
+        90deg,
+        var(--paper-2) 0%,
+        var(--paper-3) 50%,
+        var(--paper-2) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
 }
 
 .skeleton-line {
@@ -1520,7 +1661,28 @@ img {
     }
 
     .detail-image {
-        max-height: 240px;
+        max-width: 260px;
+    }
+
+    /* La colonna di testo si stringe parecchio sotto i 560px: meno
+       padding e un titolo piu' piccolo la tengono leggibile. */
+    .drink-card-body {
+        padding: 1.25rem 1rem 1.1rem;
+    }
+
+    .drink-card-name {
+        font-size: 1.2rem;
+    }
+
+    .drink-card-desc {
+        font-size: 0.84rem;
+        -webkit-line-clamp: 5;
+        line-clamp: 5;
+    }
+
+    .drink-card-image,
+    .drink-card-photo-empty {
+        min-height: 180px;
     }
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -38,6 +38,8 @@ function Explore() {
     const [search, setSearch] = useState("");
     const [selectedSpirits, setSelectedSpirits] = useState([]);
     const [analcolicoOnly, setAnalcolicoOnly] = useState(false);
+    const [filterWarning, setFilterWarning] = useState("");
+    const warningTimeoutRef = useRef(null);
 
     useEffect(() => {
         if (authLoading) {
@@ -114,10 +116,30 @@ function Explore() {
             });
         });
 
-        return SPIRITS.filter((spirit) => present.has(spirit));
+        return SPIRITS.filter((spirit) => present.has(spirit)).sort((a, b) =>
+            a.localeCompare(b, "it")
+        );
     }, [drinks]);
 
+    useEffect(() => {
+        return () => clearTimeout(warningTimeoutRef.current);
+    }, []);
+
+    const showFilterWarning = (message) => {
+        clearTimeout(warningTimeoutRef.current);
+        setFilterWarning(message);
+        warningTimeoutRef.current = setTimeout(() => setFilterWarning(""), 4000);
+    };
+
     const toggleSpirit = (spirit) => {
+        if (analcolicoOnly) {
+            showFilterWarning(
+                "Non puoi combinare “Analcolico” con un alcolico: togli prima quel filtro."
+            );
+            return;
+        }
+
+        setFilterWarning("");
         setSelectedSpirits((previous) =>
             previous.includes(spirit)
                 ? previous.filter((selected) => selected !== spirit)
@@ -125,12 +147,24 @@ function Explore() {
         );
     };
 
+    const toggleAnalcolico = () => {
+        if (!analcolicoOnly && selectedSpirits.length > 0) {
+            showFilterWarning(
+                "Non puoi combinare “Analcolico” con un alcolico: togli prima gli alcolici selezionati."
+            );
+            return;
+        }
+
+        setFilterWarning("");
+        setAnalcolicoOnly((previous) => !previous);
+    };
+
     const filteredDrinks = drinks.filter((drink) => {
         const matchesSearch = drink.name.toLowerCase().includes(search.trim().toLowerCase());
 
         const matchesSpirits =
             selectedSpirits.length === 0 ||
-            selectedSpirits.some((spirit) =>
+            selectedSpirits.every((spirit) =>
                 (drink.ingredients ?? []).some((ingredient) => ingredient.name === spirit)
             );
 
@@ -178,27 +212,36 @@ function Explore() {
             )}
 
             {!loading && !error && !isOffline && drinks.length > 0 && (
-                <div className="spirit-filters">
-                    <button
-                        type="button"
-                        className={analcolicoOnly ? "spirit-chip is-active" : "spirit-chip"}
-                        aria-pressed={analcolicoOnly}
-                        onClick={() => setAnalcolicoOnly((previous) => !previous)}
-                    >
-                        Analcolico
-                    </button>
-
-                    {availableSpirits.map((spirit) => (
+                <>
+                    <div className="spirit-filters">
                         <button
-                            key={spirit}
                             type="button"
-                            className={selectedSpirits.includes(spirit) ? "spirit-chip is-active" : "spirit-chip"}
-                            onClick={() => toggleSpirit(spirit)}
+                            className={analcolicoOnly ? "spirit-chip is-active" : "spirit-chip"}
+                            aria-pressed={analcolicoOnly}
+                            onClick={toggleAnalcolico}
                         >
-                            {spirit}
+                            Analcolico
                         </button>
-                    ))}
-                </div>
+
+                        {availableSpirits.map((spirit) => (
+                            <button
+                                key={spirit}
+                                type="button"
+                                className={selectedSpirits.includes(spirit) ? "spirit-chip is-active" : "spirit-chip"}
+                                aria-pressed={selectedSpirits.includes(spirit)}
+                                onClick={() => toggleSpirit(spirit)}
+                            >
+                                {spirit}
+                            </button>
+                        ))}
+                    </div>
+
+                    {filterWarning && (
+                        <div className="notice notice-error" role="alert">
+                            {filterWarning}
+                        </div>
+                    )}
+                </>
             )}
 
             {loading && <DrinkGridSkeleton />}
@@ -255,6 +298,7 @@ function Explore() {
                             setSearch("");
                             setSelectedSpirits([]);
                             setAnalcolicoOnly(false);
+                            setFilterWarning("");
                         }}
                     >
                         Azzera i filtri
