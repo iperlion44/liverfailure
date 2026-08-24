@@ -19,7 +19,7 @@ function Layout() {
                 <div className="shell site-footer-inner">
                     <span className="wordmark">LiverFailure</span>
                     <span className="footer-note">
-                        Bevi responsabilmente. Il fegato è uno solo.
+                        Bevi responsabilmente. Che poi finisci i soldi.
                     </span>
                 </div>
             </footer>

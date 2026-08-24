@@ -2,6 +2,7 @@ function isSupported() {
     return typeof window !== "undefined" && "Notification" in window;
 }
 
+//miglioramento dell'IA:
 // safari a volte lancia errore se non parte da un click dell'utente,
 // e comunque il salvataggio del drink non deve dipendere dalla notifica
 export async function requestNotificationPermission() {
@@ -22,6 +23,7 @@ export async function requestNotificationPermission() {
         return false;
     }
 }
+//fine miglioramento dell'IA
 
 // su android il costruttore Notification non funziona, va usato il
 // service worker. provo quella strada prima e tengo il costruttore

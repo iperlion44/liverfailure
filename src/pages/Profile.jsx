@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { signOut } from "firebase/auth";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+    EmailAuthProvider,
+    deleteUser,
+    reauthenticateWithCredential,
+    signOut
+} from "firebase/auth";
+import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
 
 import auth from "../firebase/auth";
 import db from "../firebase/firestore";
 
 import { useAuth } from "../context/useAuth";
-import { readCachedFavorites } from "../utils/favoritesStorage";
+import { getFavoritesCacheKey, readCachedFavorites } from "../utils/favoritesStorage";
+import { getMyDrinksCacheKey } from "../utils/myDrinksStorage";
 import { initialOf } from "../utils/drink";
 import { fetchProfilePhoto } from "../utils/userProfile";
 
@@ -19,6 +25,11 @@ function Profile() {
     const [stats, setStats] = useState(null);
     const [photoURL, setPhotoURL] = useState("");
     const [error, setError] = useState("");
+
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deletePassword, setDeletePassword] = useState("");
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState("");
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -66,6 +77,70 @@ function Profile() {
         } catch (error) {
             console.error(error);
             setError("Non è stato possibile uscire. Riprova.");
+        }
+    };
+
+    const handleDeleteAccount = async (event) => {
+        event.preventDefault();
+        setDeleteError("");
+
+        if (!deletePassword) {
+            setDeleteError("Inserisci la password per confermare.");
+            return;
+        }
+
+        // doppia conferma: il form da solo è troppo facile da inviare per
+        // sbaglio con un click, qui serve un secondo sì esplicito
+        const confirmed = window.confirm(
+            "Eliminare definitivamente il profilo? I tuoi drink e preferiti verranno cancellati e l'azione non si può annullare."
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            setDeleting(true);
+
+            // firebase rifiuta deleteUser se il login non è "recente", per
+            // questo chiedo di nuovo la password invece di eliminare e basta
+            const credential = EmailAuthProvider.credential(user.email, deletePassword);
+            await reauthenticateWithCredential(auth.currentUser, credential);
+
+            // cancello prima tutto quello che sta su firestore e solo alla
+            // fine l'utente auth: le regole di sicurezza si basano su
+            // request.auth, se elimino l'utente prima questi delete
+            // verrebbero rifiutati
+            const drinksSnapshot = await getDocs(
+                query(collection(db, "drinks"), where("authorId", "==", user.uid))
+            );
+            await Promise.all(drinksSnapshot.docs.map((document) => deleteDoc(document.ref)));
+
+            const favoritesSnapshot = await getDocs(collection(db, "users", user.uid, "favorites"));
+            await Promise.all(favoritesSnapshot.docs.map((document) => deleteDoc(document.ref)));
+
+            await deleteDoc(doc(db, "users", user.uid));
+
+            // altrimenti il prossimo che apre l'app da questo browser si
+            // ritrova in cache i drink/preferiti di un account cancellato
+            localStorage.removeItem(getFavoritesCacheKey(user.uid));
+            localStorage.removeItem(getMyDrinksCacheKey(user.uid));
+
+            await deleteUser(auth.currentUser);
+
+            navigate("/");
+        } catch (error) {
+            console.error(error);
+
+            if (error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
+                setDeleteError("La password non è corretta.");
+            } else if (error.code === "auth/requires-recent-login") {
+                setDeleteError("Per motivi di sicurezza, esci e accedi di nuovo prima di eliminare il profilo.");
+            } else {
+                setDeleteError("Non è stato possibile eliminare il profilo. Riprova.");
+            }
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -129,6 +204,68 @@ function Profile() {
                     Esci
                 </button>
             </div>
+
+            <section className="danger-zone">
+                <span className="eyebrow">Eliminazione</span>
+
+                {!showDeleteConfirm ? (
+                    <div className="form-actions">
+                        <button
+                            type="button"
+                            className="btn btn-danger-quiet"
+                            onClick={() => setShowDeleteConfirm(true)}
+                        >
+                            Elimina profilo
+                        </button>
+                    </div>
+                ) : (
+                    <form onSubmit={handleDeleteAccount}>
+                        <p className="field-hint">
+                            Questa azione cancella il tuo account, i drink che hai scritto e i preferiti.
+                            Non si può annullare. Conferma con la tua password.
+                        </p>
+
+                        {deleteError && (
+                            <div className="form-error" role="alert">
+                                {deleteError}
+                            </div>
+                        )}
+
+                        <div className="field">
+                            <label className="field-label" htmlFor="delete-password">
+                                Password
+                            </label>
+                            <input
+                                id="delete-password"
+                                className="input"
+                                type="password"
+                                autoComplete="current-password"
+                                value={deletePassword}
+                                onChange={(event) => setDeletePassword(event.target.value)}
+                                placeholder="La tua password"
+                            />
+                        </div>
+
+                        <div className="form-actions">
+                            <button type="submit" className="btn btn-danger-quiet" disabled={deleting}>
+                                {deleting ? "Elimino..." : "Conferma eliminazione"}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-outline"
+                                onClick={() => {
+                                    setShowDeleteConfirm(false);
+                                    setDeletePassword("");
+                                    setDeleteError("");
+                                }}
+                                disabled={deleting}
+                            >
+                                Annulla
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </section>
         </div>
     );
 }

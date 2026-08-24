@@ -90,7 +90,7 @@ function DrinkDetailsView({ id }) {
 
                 // se non riesco a leggere da firestore ma il drink è
                 // salvato in locale (preferiti o miei drink), meglio
-                // mostrare quello che dire "non esiste" a caso
+                // mostrare quello che dire "non esiste"
                 if (!cancelled && cachedDrink) {
                     setDrink(cachedDrink);
                     setIsCached(true);

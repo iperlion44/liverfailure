@@ -23,6 +23,9 @@ export function validateDrinkImage(file) {
     return "";
 }
 
+//gestione delle immagini fatta con IA:
+
+
 // le foto fatte col telefono hanno un tag EXIF che dice come vanno
 // ruotate, e su alcuni browser mobile se non lo applichi prima di
 // disegnare sul canvas l'immagine viene fuori tutta schiacciata.

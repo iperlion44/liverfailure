@@ -1,7 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react";
 
-// tengo una MediaQueryList per stringa invece di ricrearla ogni volta,
-// perché getSnapshot viene chiamato ad ogni render
+// tengo una MediaQueryList per stringa invece di ricrearla ogni volta, perche'window.matchMedia' è pesante e non voglio fare un sacco di oggetti identici
 const lists = new Map();
 
 function listFor(queryString) {

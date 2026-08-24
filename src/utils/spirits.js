@@ -1,3 +1,4 @@
+//per semplicità ho usato solo ingredienti ecc piu famosi e usati
 export const SPIRITS = [
     "Amaretto",
     "Aperol",

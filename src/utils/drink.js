@@ -2,8 +2,7 @@
 // provato e 300 sembra il punto giusto
 export const DESCRIPTION_MAX_LENGTH = 300;
 
-// le ricette più vecchie avevano gli ingredienti come testo libero
-// (a capo o separati da virgola), questa funzione le legge lo stesso
+// per la retrocompatibilità con le ricette vecchie, che avevano gli ingredienti come stringa:
 export function parseIngredients(rawIngredients) {
     if (!rawIngredients || typeof rawIngredients !== "string") {
         return [];
@@ -24,8 +23,7 @@ export function parseIngredients(rawIngredients) {
         .filter(Boolean);
 }
 
-// le ricette vecchie hanno gli ingredienti come stringa, quelle nuove
-// come array di { name, quantity }. qui li riporto tutti alla stessa forma
+// porto tutto in formato nuovo, con array di oggetti {name, quantity} e quantità opzionale. Se la quantità non c'è, metto stringa vuota
 export function normalizeIngredients(rawIngredients) {
     if (Array.isArray(rawIngredients)) {
         return rawIngredients

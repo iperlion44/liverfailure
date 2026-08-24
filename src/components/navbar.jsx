@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 
 import { useAuth } from "../context/useAuth";
 
+// aggiunta dell'IA: il menu utente è un componente pesante, lo carico solo se serve
 // l'avatar è l'unica parte della navbar che va a leggere firestore
 // (la foto profilo), quindi lo carico lazy per non tirarsi dietro
 // l'SDK solo per disegnare l'header
