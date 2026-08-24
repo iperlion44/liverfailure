@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 import db from "../firebase/firestore";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import {
     mergeFavorites,
     readCachedFavorites,
@@ -72,9 +72,9 @@ function Favorites() {
 
                 const validDrinks = results.filter((result) => result.drink).map((result) => result.drink);
 
-                // Drink eliminato o reso privato da chi non è l'autore, ma
-                // il riferimento ai preferiti è rimasto: lo rimuoviamo da
-                // Firestore e dalla cache locale.
+                // se il drink è stato cancellato o messo privato da chi
+                // non è l'autore, il riferimento nei preferiti resta
+                // "orfano": lo tolgo sia da firestore che dalla cache
                 const staleIds = results.filter((result) => !result.drink).map((result) => result.id);
 
                 if (staleIds.length > 0) {

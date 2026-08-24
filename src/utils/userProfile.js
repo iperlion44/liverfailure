@@ -2,8 +2,8 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 
 import db from "../firebase/firestore";
 
-// Salvata in Firestore come data URL: il campo photoURL di Firebase
-// Auth ha un limite di lunghezza troppo basso per un'immagine inline.
+// la salvo in firestore come data URL perché il campo photoURL di
+// firebase auth è troppo corto per starci un'immagine intera
 export async function fetchProfilePhoto(uid) {
     if (!uid) {
         return "";

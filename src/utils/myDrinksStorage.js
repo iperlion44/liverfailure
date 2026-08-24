@@ -1,3 +1,5 @@
+import { writeCache } from "./localCache.js";
+
 export const getMyDrinksCacheKey = (uid) => `my-drinks-${uid}`;
 
 function getStorage() {
@@ -40,12 +42,10 @@ export function writeCachedMyDrinks(uid, drinks) {
         return;
     }
 
-    try {
-        storage.setItem(
-            getMyDrinksCacheKey(uid),
-            JSON.stringify(drinks)
-        );
-    } catch (error) {
-        console.error("Errore salvataggio drink cache:", error);
-    }
+    writeCache(
+        storage,
+        getMyDrinksCacheKey(uid),
+        drinks,
+        "Errore salvataggio drink cache:"
+    );
 }

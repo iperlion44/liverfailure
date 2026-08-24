@@ -119,10 +119,6 @@ img {
     font-size: clamp(2rem, 4.5vw, 3.25rem);
 }
 
-.display-m {
-    font-size: clamp(1.5rem, 2.6vw, 2rem);
-}
-
 .lede {
     font-size: clamp(1.02rem, 1.5vw, 1.18rem);
     line-height: 1.6;
@@ -130,17 +126,6 @@ img {
     max-width: 52ch;
     text-wrap: pretty;
 }
-
-.muted {
-    color: var(--ink-2);
-}
-
-.rule {
-    height: 1px;
-    border: 0;
-    background: var(--rule);
-}
-
 
 /* =========================================================
    3. HEADER
@@ -311,15 +296,6 @@ img {
 
 .btn-primary:hover:not(:disabled) {
     background: var(--bitter-dark);
-}
-
-.btn-ink {
-    background: var(--ink);
-    color: #fff;
-}
-
-.btn-ink:hover:not(:disabled) {
-    background: #000;
 }
 
 .btn-outline {
@@ -970,8 +946,8 @@ img {
     z-index: 1;
 }
 
-/* Solo con mouse: su touch :hover non si stacca al tocco e la carta
-   resterebbe sollevata dopo ogni tap. */
+/* solo se c'è il mouse, sennò su touch :hover resta "attaccato"
+   dopo il tap e la card sembra sollevata per sempre */
 @media (hover: hover) {
     a:hover > .drink-card,
     .drink-card:hover {
@@ -1034,6 +1010,8 @@ img {
     line-clamp: 6;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .drink-card-meta {
@@ -1182,6 +1160,8 @@ img {
     line-height: 1.65;
     color: var(--ink-2);
     text-wrap: pretty;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 /* Ricetta: ingredienti a sinistra, procedimento a destra */
@@ -1385,6 +1365,14 @@ img {
     font-family: var(--font-display);
     font-size: 1.5rem;
     line-height: 1;
+    overflow: hidden;
+}
+
+/* senza min-width: 0 un nome o email lunghi spingevano fuori dal
+   bordo della card invece di andare a capo (soprattutto su telefono) */
+.profile-info {
+    min-width: 0;
+    flex: 1;
 }
 
 .avatar-sm {
@@ -1656,11 +1644,26 @@ img {
     }
 
     .detail-image {
-        max-width: 260px;
+        max-width: 100%;
     }
 
-    /* Sotto i 560px la colonna di testo si stringe: meno padding e
-       titolo piu' piccolo per restare leggibile. */
+    /* sotto i 560px la foto affiancata diventa troppo stretta e
+       illeggibile, meglio impilare tutto con la foto sopra */
+    .drink-card {
+        grid-template-columns: 1fr;
+    }
+
+    .drink-card::before {
+        display: none;
+    }
+
+    .drink-card-photo {
+        order: -1;
+        border-left: none;
+        border-bottom: 1px solid var(--rule);
+        aspect-ratio: 4 / 3;
+    }
+
     .drink-card-body {
         padding: 1.25rem 1rem 1.1rem;
     }
@@ -1677,12 +1680,14 @@ img {
 
     .drink-card-image,
     .drink-card-photo-empty {
-        min-height: 180px;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
     }
 }
 
-/* Bersagli più grandi su input touch, a prescindere dalla larghezza
-   schermo (un laptop touch resta a schermo largo). */
+/* pulsanti più grandi se il puntatore è touch, indipendentemente
+   dalla larghezza (un laptop touchscreen ha comunque schermo largo) */
 @media (pointer: coarse) {
 
     .nav-toggle {

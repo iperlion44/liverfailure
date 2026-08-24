@@ -1,13 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
 
 import db from "../firebase/firestore";
+import { onIdle } from "../utils/idle";
 
-// Con poche immagini il loop si ripete troppo in fretta: meglio
-// nascondere la colonna che mostrarla povera.
+// con poche foto il loop si vede ripetere troppo in fretta, meglio
+// non mostrare proprio la colonna
 const MIN_IMAGES = 6;
+
+// le foto sono data URL dentro al documento quindi pesano parecchio,
+// 16 mi sembravano un buon compromesso tra varietà e mb scaricati
+// per una cosa che è solo decorativa
+const MAX_IMAGES = 16;
 
 function shuffle(items) {
     const shuffled = [...items];
@@ -25,8 +31,7 @@ function splitAlternating(items) {
     const left = [];
     const right = [];
 
-    // Si mischia prima di alternare, cosi' la suddivisione tra le
-    // due colonne cambia ad ogni refresh.
+    // mischio prima di dividere così le due colonne cambiano ogni volta
     shuffle(items).forEach((item, index) => {
         (index % 2 === 0 ? left : right).push(item);
     });
@@ -34,14 +39,49 @@ function splitAlternating(items) {
     return [left, right];
 }
 
-// Durata proporzionale al numero di immagini, cosi' la velocita'
-// percepita resta la stessa in ogni colonna.
+// tempo proporzionale al numero di foto, altrimenti una colonna con
+// meno immagini sembra andare più veloce delle altre
 const SECONDS_PER_IMAGE = 6;
 
+function toImageEntries(querySnapshot) {
+    return querySnapshot.docs
+        .map((document) => {
+            const data = document.data();
+
+            return { id: document.id, image: data.image ?? "" };
+        })
+        .filter((drink) => drink.image);
+}
+
+// con l'indice composito (isPublic + createdAt) prendo le foto più
+// recenti. se l'indice non c'è firestore risponde failed-precondition
+// e allora prendo quelle che vengono, tanto sono a caso comunque
+async function fetchLatestImages() {
+    const publicDrinks = collection(db, "drinks");
+
+    try {
+        return await getDocs(
+            query(
+                publicDrinks,
+                where("isPublic", "==", true),
+                orderBy("createdAt", "desc"),
+                limit(MAX_IMAGES)
+            )
+        );
+    } catch (error) {
+        if (error?.code !== "failed-precondition") {
+            throw error;
+        }
+
+        return getDocs(
+            query(publicDrinks, where("isPublic", "==", true), limit(MAX_IMAGES))
+        );
+    }
+}
+
 function MarqueeColumn({ drinks, direction }) {
-    // Lista raddoppiata + traslazione del 50%: la seconda copia
-    // prende il posto della prima quando l'animazione riparte,
-    // dando un loop senza scatti.
+    // raddoppio la lista e traslo del 50%, così quando l'animazione
+    // riparte la seconda copia è già al posto giusto e non si vede lo scatto
     const track = [...drinks, ...drinks];
     const duration = `${drinks.length * SECONDS_PER_IMAGE}s`;
 
@@ -57,6 +97,7 @@ function MarqueeColumn({ drinks, direction }) {
                     src={drink.image}
                     alt=""
                     loading="lazy"
+                    decoding="async"
                 />
             ))}
         </div>
@@ -75,40 +116,36 @@ function DrinkMarquee() {
                     return;
                 }
 
-                const querySnapshot = await getDocs(
-                    query(collection(db, "drinks"), where("isPublic", "==", true))
-                );
-
-                const withImages = querySnapshot.docs
-                    .map((document) => {
-                        const data = document.data();
-
-                        return { id: document.id, image: data.image ?? "" };
-                    })
-                    .filter((drink) => drink.image);
+                const querySnapshot = await fetchLatestImages();
 
                 if (!cancelled) {
-                    setDrinks(withImages);
+                    setDrinks(toImageEntries(querySnapshot));
                 }
             } catch (error) {
-                // Decorativa: se fallisce la home resta utilizzabile,
-                // solo senza le colonne.
+                // tanto è solo decorazione, se fallisce pace, la home
+                // funziona comunque senza le colonne
                 console.error(error);
             }
         };
 
-        fetchImages();
+        // aspetto che il browser sia libero prima di scaricare foto
+        // che servono solo a fare scena
+        const cancelIdle = onIdle(fetchImages);
 
         return () => {
             cancelled = true;
+            cancelIdle();
         };
     }, []);
+
+    // se non metto il memo, ogni volta che il componente si ridisegna
+    // (tipo quando cambia lo stato del login) la lista si rimescola
+    // di nuovo e l'animazione riparte da zero
+    const [leftDrinks, rightDrinks] = useMemo(() => splitAlternating(drinks), [drinks]);
 
     if (drinks.length < MIN_IMAGES) {
         return null;
     }
-
-    const [leftDrinks, rightDrinks] = splitAlternating(drinks);
 
     return (
         <>

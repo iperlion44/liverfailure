@@ -6,7 +6,7 @@ import { Link, useParams } from "react-router-dom";
 
 import db from "../firebase/firestore";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import {
     readCachedFavorites,
     removeFavoriteLocally,
@@ -38,19 +38,18 @@ function FavMark({ draw = false }) {
     );
 }
 
-function DrinkDetails() {
-    const { id } = useParams();
-
+function DrinkDetailsView({ id }) {
     const [drink, setDrink] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Sovrascrive lo stato letto da cache appena l'utente clicca, così
-    // l'interfaccia risponde subito senza rileggere localStorage.
+    // quando clicco preferiti aggiorno subito questo invece di aspettare
+    // che si rilegga tutto da localStorage, così sembra più reattivo
     const [override, setOverride] = useState(null);
 
     const [notice, setNotice] = useState("");
 
-    // Disegna il segno di conferma solo al click, non al caricamento.
+    // per far vedere l'animazione del segno di spunta solo quando clicco
+    // davvero, non quando la pagina si carica con un drink già salvato
     const [justSaved, setJustSaved] = useState(false);
 
     const [isCached, setIsCached] = useState(false);
@@ -58,6 +57,8 @@ function DrinkDetails() {
     const { user } = useAuth();
 
     useEffect(() => {
+        let cancelled = false;
+
         const cachedDrink = user
             ? readCachedFavorites(user.uid).find((favorite) => favorite.id === id) ??
               readCachedMyDrinks(user.uid).find((myDrink) => myDrink.id === id)
@@ -71,6 +72,10 @@ function DrinkDetails() {
 
                 const snapshot = await getDoc(doc(db, "drinks", id));
 
+                if (cancelled) {
+                    return;
+                }
+
                 if (snapshot.exists()) {
                     const data = snapshot.data();
                     const isOwnerOfDrink = user && data.authorId === user.uid;
@@ -83,19 +88,25 @@ function DrinkDetails() {
             } catch (error) {
                 console.error(error);
 
-                // Niente documento fresco: se il drink è salvato localmente
-                // (preferiti o miei drink) mostriamo quella copia invece
-                // della schermata "non esiste".
-                if (cachedDrink) {
+                // se non riesco a leggere da firestore ma il drink è
+                // salvato in locale (preferiti o miei drink), meglio
+                // mostrare quello che dire "non esiste" a caso
+                if (!cancelled && cachedDrink) {
                     setDrink(cachedDrink);
                     setIsCached(true);
                 }
             } finally {
-                setLoading(false);
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchDrink();
+
+        return () => {
+            cancelled = true;
+        };
     }, [id, user]);
 
     const isSaved = useMemo(() => {
@@ -364,6 +375,14 @@ function DrinkDetails() {
             </div>
         </div>
     );
+}
+
+// con key={id} il componente si rimonta da zero quando cambio ricetta,
+// sennò restava a video quella vecchia finché non arrivava la nuova
+function DrinkDetails() {
+    const { id } = useParams();
+
+    return <DrinkDetailsView key={id} id={id} />;
 }
 
 export default DrinkDetails;

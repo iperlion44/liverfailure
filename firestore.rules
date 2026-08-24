@@ -16,7 +16,8 @@ service cloud.firestore {
         && data.name is string && data.name.size() > 0
         && data.preparation is string && data.preparation.size() > 0
         && data.ingredients is list && data.ingredients.size() > 0
-        && data.isPublic is bool;
+        && data.isPublic is bool
+        && (!('description' in data) || (data.description is string && data.description.size() <= 300));
     }
 
     match /drinks/{drinkId} {

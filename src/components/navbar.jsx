@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 
-import { useAuth } from "../context/AuthContext";
-import UserMenu from "./UserMenu";
+import { useAuth } from "../context/useAuth";
+
+// l'avatar è l'unica parte della navbar che va a leggere firestore
+// (la foto profilo), quindi lo carico lazy per non tirarsi dietro
+// l'SDK solo per disegnare l'header
+const UserMenu = lazy(() => import("./UserMenu"));
 
 function Navbar() {
     const { user } = useAuth();
@@ -77,7 +81,12 @@ function Navbar() {
                             <Link to="/create-drink" className="btn btn-primary btn-sm">
                                 Crea drink
                             </Link>
-                            <UserMenu />
+
+                            {/* placeholder della stessa dimensione dell'avatar, così
+                                quando arriva non fa saltare il layout */}
+                            <Suspense fallback={<span className="avatar avatar-sm" aria-hidden="true" />}>
+                                <UserMenu />
+                            </Suspense>
                         </>
                     ) : (
                         <>

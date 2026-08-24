@@ -1,12 +1,7 @@
-import { useEffect } from "react";
-
 import AppRoutes from "./routes";
-import { requestNotificationPermission } from "./utils/notifications";
 
+// non chiedo il permesso per le notifiche all'avvio, safari lo rifiuta
+// se non parte da un click. ci pensa showNotification al primo salvataggio
 export default function App() {
-    useEffect(() => {
-        requestNotificationPermission();
-    }, []);
-
     return <AppRoutes />;
 }

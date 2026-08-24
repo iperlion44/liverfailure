@@ -1,6 +1,8 @@
+import { memo } from "react";
+
 import { countIngredients } from "../utils/drink";
 
-// Placeholder per i drink senza foto
+// icona al posto della foto quando il drink non ne ha una
 function GlassMark() {
     return (
         <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
@@ -54,7 +56,13 @@ function DrinkCard({ drink, showStatus = false, children }) {
 
             <div className="drink-card-photo">
                 {drink.image ? (
-                    <img className="drink-card-image" src={drink.image} alt="" loading="lazy" />
+                    <img
+                        className="drink-card-image"
+                        src={drink.image}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                    />
                 ) : (
                     <div className="drink-card-photo-empty">
                         <GlassMark />
@@ -65,4 +73,8 @@ function DrinkCard({ drink, showStatus = false, children }) {
     );
 }
 
-export default DrinkCard;
+// le foto sono data URL grosse dentro alla prop drink, quindi senza
+// memo ogni carattere digitato nella ricerca fa ricontrollare tutte
+// quelle stringhe. gli oggetti drink non cambiano riferimento se non
+// cambiano davvero, quindi il memo funziona bene qui
+export default memo(DrinkCard);

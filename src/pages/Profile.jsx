@@ -7,7 +7,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import auth from "../firebase/auth";
 import db from "../firebase/firestore";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { readCachedFavorites } from "../utils/favoritesStorage";
 import { initialOf } from "../utils/drink";
 import { fetchProfilePhoto } from "../utils/userProfile";
@@ -95,7 +95,7 @@ function Profile() {
                     </span>
                 )}
 
-                <div>
+                <div className="profile-info">
                     <p className="profile-name">{user?.displayName || "Senza nome"}</p>
                     <p className="profile-email">{user?.email}</p>
                 </div>

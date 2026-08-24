@@ -1,14 +1,28 @@
+import { Suspense, lazy } from "react";
 import { Link } from "react-router-dom";
 
-import { useAuth } from "../context/AuthContext";
-import DrinkMarquee from "../components/DrinkMarquee";
+import { useAuth } from "../context/useAuth";
+import { useMediaQuery } from "../utils/useMediaQuery";
+
+// le colonne con le foto sono solo decorative ma leggono da firestore,
+// quindi le carico in lazy per non appesantire il bundle della home
+const DrinkMarquee = lazy(() => import("../components/DrinkMarquee"));
+
+// stessa soglia di .marquee in global.css. sotto questa larghezza il
+// CSS le nasconde comunque quindi non ha senso nemmeno montarle
+const MARQUEE_BREAKPOINT = "(min-width: 1500px)";
 
 function Home() {
     const { user } = useAuth();
+    const showsMarquee = useMediaQuery(MARQUEE_BREAKPOINT);
 
     return (
         <>
-            <DrinkMarquee />
+            {showsMarquee && (
+                <Suspense fallback={null}>
+                    <DrinkMarquee />
+                </Suspense>
+            )}
 
             <section className="shell hero">
                 <div className="hero-label">

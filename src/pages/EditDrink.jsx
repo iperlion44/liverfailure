@@ -6,10 +6,15 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import db from "../firebase/firestore";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { Loader } from "../components/Loader";
 import EmptyState from "../components/EmptyState";
-import { normalizeIngredients, extractMlValue } from "../utils/drink";
+import {
+    buildIngredients,
+    normalizeIngredients,
+    extractMlValue,
+    DESCRIPTION_MAX_LENGTH
+} from "../utils/drink";
 import { SPIRITS, NON_ALCOHOLIC, EXTRAS, isAlcoholic, isExtra } from "../utils/spirits";
 import { readDrinkImage, validateDrinkImage } from "../utils/drinkImage";
 
@@ -33,6 +38,7 @@ function EditDrink() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [forbidden, setForbidden] = useState(false);
+    const [missing, setMissing] = useState(false);
 
     const handleImageChange = async (event) => {
         const file = event.target.files?.[0];
@@ -108,7 +114,7 @@ function EditDrink() {
                     setIsPublic(Boolean(data.isPublic));
                     setImageData(data.image || "");
                 } else {
-                    setError("Questo drink non esiste più.");
+                    setMissing(true);
                 }
             } catch (error) {
                 console.error(error);
@@ -175,29 +181,29 @@ function EditDrink() {
         event.preventDefault();
         setError("");
 
-        const cleanMlIngredients = (list) =>
-            list
-                .filter((ingredient) => ingredient.name && String(ingredient.quantity).trim())
-                .map((ingredient) => ({
-                    name: ingredient.name,
-                    quantity: `${String(ingredient.quantity).trim()} ml`
-                }));
+        const trimmedName = name.trim();
+        const trimmedPreparation = preparation.trim();
 
-        const cleanExtraIngredients = extraIngredients
-            .filter((ingredient) => ingredient.name && ingredient.quantity.trim())
-            .map((ingredient) => ({
-                name: ingredient.name,
-                quantity: ingredient.quantity.trim()
-            }));
+        // stessa cosa di CreateDrink: required non basta, firestore
+        // rifiuta le stringhe vuote quindi controllo prima io
+        if (!trimmedName) {
+            setError("Dai un nome al drink.");
+            return;
+        }
 
-        const cleanIngredients = [
-            ...cleanMlIngredients(ingredients),
-            ...cleanMlIngredients(nonAlcoholicIngredients),
-            ...cleanExtraIngredients
-        ];
+        if (!trimmedPreparation) {
+            setError("Scrivi come si prepara il drink.");
+            return;
+        }
+
+        const cleanIngredients = buildIngredients({
+            alcoholic: ingredients,
+            nonAlcoholic: nonAlcoholicIngredients,
+            extras: extraIngredients
+        });
 
         if (cleanIngredients.length === 0) {
-            setError("Aggiungi almeno un ingrediente, alcolico, analcolico o extra, con la sua quantità.");
+            setError("Aggiungi almeno un ingrediente: alcolico, analcolico o extra.");
             return;
         }
 
@@ -205,10 +211,10 @@ function EditDrink() {
             setSaving(true);
 
             await updateDoc(doc(db, "drinks", id), {
-                name: name.trim(),
+                name: trimmedName,
                 description: description.trim(),
                 ingredients: cleanIngredients,
-                preparation: preparation.trim(),
+                preparation: trimmedPreparation,
                 isPublic,
                 image: imageData
             });
@@ -223,6 +229,22 @@ function EditDrink() {
 
     if (loading) {
         return <Loader label="Carico la ricetta" />;
+    }
+
+    if (missing) {
+        return (
+            <div className="shell page">
+                <EmptyState
+                    eyebrow="Ricetta assente"
+                    title="Questo drink non esiste più"
+                    body="Il link potrebbe essere vecchio, oppure la ricetta è stata eliminata."
+                >
+                    <Link to="/my-drinks" className="btn btn-primary">
+                        Vai ai tuoi drink
+                    </Link>
+                </EmptyState>
+            </div>
+        );
     }
 
     if (forbidden) {
@@ -280,7 +302,11 @@ function EditDrink() {
                         style={{ minHeight: 90 }}
                         value={description}
                         onChange={(event) => setDescription(event.target.value)}
+                        maxLength={DESCRIPTION_MAX_LENGTH}
                     />
+                    <span className="field-hint">
+                        {description.length}/{DESCRIPTION_MAX_LENGTH}
+                    </span>
                 </div>
 
                 <div className="field">
@@ -336,7 +362,7 @@ function EditDrink() {
                     <label className="field-label">Ingredienti</label>
                     <span className="field-hint">
                         Aggiungi almeno un ingrediente, alcolico,
-                        analcolico o extra, con la sua quantità.
+                        analcolico o extra. La quantità è facoltativa.
                     </span>
 
                     <div className="ingredient-section">
@@ -402,6 +428,9 @@ function EditDrink() {
                                     }
                                 >
                                     <option value="">Scegli un analcolico</option>
+                                    {ingredient.name && !NON_ALCOHOLIC.includes(ingredient.name) && (
+                                        <option value={ingredient.name}>{ingredient.name}</option>
+                                    )}
                                     {NON_ALCOHOLIC.map((item) => (
                                         <option key={item} value={item}>
                                             {item}

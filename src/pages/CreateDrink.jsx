@@ -5,10 +5,11 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 import db from "../firebase/firestore";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { showNotification } from "../utils/notifications";
 import { SPIRITS, NON_ALCOHOLIC, EXTRAS } from "../utils/spirits";
 import { readDrinkImage, validateDrinkImage } from "../utils/drinkImage";
+import { buildIngredients, DESCRIPTION_MAX_LENGTH } from "../utils/drink";
 
 const emptyIngredientRow = () => ({ name: "", quantity: "" });
 
@@ -114,29 +115,30 @@ function CreateDrink() {
         setError("");
         setSavedName("");
 
-        const cleanMlIngredients = (list) =>
-            list
-                .filter((ingredient) => ingredient.name && String(ingredient.quantity).trim())
-                .map((ingredient) => ({
-                    name: ingredient.name,
-                    quantity: `${String(ingredient.quantity).trim()} ml`
-                }));
+        const trimmedName = name.trim();
+        const trimmedPreparation = preparation.trim();
 
-        const cleanExtraIngredients = extraIngredients
-            .filter((ingredient) => ingredient.name && ingredient.quantity.trim())
-            .map((ingredient) => ({
-                name: ingredient.name,
-                quantity: ingredient.quantity.trim()
-            }));
+        // l'attributo required dell'html non blocca gli spazi vuoti, ma
+        // firestore sì, quindi meglio controllarlo qui invece di far
+        // uscire un errore di permessi a caso
+        if (!trimmedName) {
+            setError("Dai un nome al drink.");
+            return;
+        }
 
-        const cleanIngredients = [
-            ...cleanMlIngredients(ingredients),
-            ...cleanMlIngredients(nonAlcoholicIngredients),
-            ...cleanExtraIngredients
-        ];
+        if (!trimmedPreparation) {
+            setError("Scrivi come si prepara il drink.");
+            return;
+        }
+
+        const cleanIngredients = buildIngredients({
+            alcoholic: ingredients,
+            nonAlcoholic: nonAlcoholicIngredients,
+            extras: extraIngredients
+        });
 
         if (cleanIngredients.length === 0) {
-            setError("Aggiungi almeno un ingrediente, alcolico, analcolico o extra, con la sua quantità.");
+            setError("Aggiungi almeno un ingrediente: alcolico, analcolico o extra.");
             return;
         }
 
@@ -144,10 +146,10 @@ function CreateDrink() {
             setSaving(true);
 
             await addDoc(collection(db, "drinks"), {
-                name: name.trim(),
+                name: trimmedName,
                 description: description.trim(),
                 ingredients: cleanIngredients,
-                preparation: preparation.trim(),
+                preparation: trimmedPreparation,
                 image: imageData,
                 isPublic,
                 authorId: user.uid,
@@ -155,9 +157,9 @@ function CreateDrink() {
                 createdAt: serverTimestamp()
             });
 
-            showNotification("Nuovo drink", `${name} è stato creato con successo.`);
+            showNotification("Nuovo drink", `${trimmedName} è stato creato con successo.`);
 
-            setSavedName(name.trim());
+            setSavedName(trimmedName);
             setName("");
             setDescription("");
             setIngredients([emptyIngredientRow()]);
@@ -228,7 +230,11 @@ function CreateDrink() {
                         placeholder="Una riga per far capire com'è e quando si beve."
                         value={description}
                         onChange={(event) => setDescription(event.target.value)}
+                        maxLength={DESCRIPTION_MAX_LENGTH}
                     />
+                    <span className="field-hint">
+                        {description.length}/{DESCRIPTION_MAX_LENGTH}
+                    </span>
                 </div>
 
                 <div className="field">
@@ -266,7 +272,7 @@ function CreateDrink() {
                     <label className="field-label">Ingredienti</label>
                     <span className="field-hint">
                         Aggiungi almeno un ingrediente, alcolico,
-                        analcolico o extra, con la sua quantità.
+                        analcolico o extra. La quantità è facoltativa.
                     </span>
 
                     <div className="ingredient-section">

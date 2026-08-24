@@ -5,7 +5,7 @@ import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/fire
 
 import db from "../firebase/firestore";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import DrinkCard from "../components/DrinkCard";
 import EmptyState from "../components/EmptyState";
 import { DrinkGridSkeleton } from "../components/Loader";
@@ -37,11 +37,13 @@ function MyDrinks() {
                 console.error(error);
             });
 
-            setDrinks((previousDrinks) => {
-                const nextDrinks = previousDrinks.filter((drink) => drink.id !== drinkId);
-                writeCachedMyDrinks(user.uid, nextDrinks);
-                return nextDrinks;
-            });
+            // tengo il salvataggio su localStorage fuori dal setDrinks,
+            // in StrictMode gli updater vengono chiamati due volte e
+            // non voglio scrivere doppio
+            const nextDrinks = drinks.filter((drink) => drink.id !== drinkId);
+
+            setDrinks(nextDrinks);
+            writeCachedMyDrinks(user.uid, nextDrinks);
         } catch (error) {
             console.error(error);
             setError("Non è stato possibile eliminare il drink. Riprova.");
@@ -49,6 +51,8 @@ function MyDrinks() {
     };
 
     useEffect(() => {
+        let cancelled = false;
+
         const fetchMyDrinks = async () => {
             const cachedDrinks = readCachedMyDrinks(user.uid);
 
@@ -67,9 +71,14 @@ function MyDrinks() {
                 );
 
                 const querySnapshot = await getDocs(drinksQuery);
-                const drinksList = querySnapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data()
+
+                if (cancelled) {
+                    return;
+                }
+
+                const drinksList = querySnapshot.docs.map((document) => ({
+                    id: document.id,
+                    ...document.data()
                 }));
 
                 setDrinks(drinksList);
@@ -78,6 +87,10 @@ function MyDrinks() {
             } catch (error) {
                 console.error(error);
 
+                if (cancelled) {
+                    return;
+                }
+
                 if (cachedDrinks.length > 0) {
                     setDrinks(cachedDrinks);
                     setIsCached(true);
@@ -85,11 +98,17 @@ function MyDrinks() {
                     setError("Non è stato possibile caricare i tuoi drink. Controlla la connessione e riprova.");
                 }
             } finally {
-                setLoading(false);
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchMyDrinks();
+
+        return () => {
+            cancelled = true;
+        };
     }, [user]);
 
     const publicCount = drinks.filter((drink) => drink.isPublic).length;

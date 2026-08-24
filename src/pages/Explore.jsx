@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { collection, getDocs, query, where } from "firebase/firestore";
 
 import db from "../firebase/firestore";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import DrinkCard from "../components/DrinkCard";
 import EmptyState from "../components/EmptyState";
 import { DrinkGridSkeleton } from "../components/Loader";
@@ -52,8 +52,8 @@ function Explore() {
                 setError("");
                 setIsOffline(false);
 
-                // Nessuna cache per la libreria condivisa: da offline non
-                // c'è niente di affidabile da mostrare.
+                // qui non tengo una cache della libreria condivisa,
+                // offline non c'è niente di affidabile da far vedere
                 if (!navigator.onLine) {
                     throw new Error("Offline");
                 }
@@ -157,20 +157,32 @@ function Explore() {
         setAnalcolicoOnly((previous) => !previous);
     };
 
-    const filteredDrinks = drinks.filter((drink) => {
-        const matchesSearch = drink.name.toLowerCase().includes(search.trim().toLowerCase());
+    // uso useDeferredValue perché la griglia con tutte le foto dentro
+    // non è leggera da ridisegnare, così il campo di ricerca resta
+    // scattante e i risultati arrivano con un attimo di ritardo
+    const deferredSearch = useDeferredValue(search);
 
-        const matchesSpirits =
-            selectedSpirits.length === 0 ||
-            selectedSpirits.every((spirit) =>
-                (drink.ingredients ?? []).some((ingredient) => ingredient.name === spirit)
-            );
+    // senza useMemo il filtro rifà tutto il giro della libreria ad ogni
+    // render, anche per cose che non c'entrano tipo il menu che si apre
+    const filteredDrinks = useMemo(() => {
+        const needle = deferredSearch.trim().toLowerCase();
 
-        const matchesAnalcolico =
-            !analcolicoOnly || !(drink.ingredients ?? []).some((ingredient) => isAlcoholic(ingredient.name));
+        return drinks.filter((drink) => {
+            const matchesSearch = drink.name.toLowerCase().includes(needle);
 
-        return matchesSearch && matchesSpirits && matchesAnalcolico;
-    });
+            const matchesSpirits =
+                selectedSpirits.length === 0 ||
+                selectedSpirits.every((spirit) =>
+                    (drink.ingredients ?? []).some((ingredient) => ingredient.name === spirit)
+                );
+
+            const matchesAnalcolico =
+                !analcolicoOnly ||
+                !(drink.ingredients ?? []).some((ingredient) => isAlcoholic(ingredient.name));
+
+            return matchesSearch && matchesSpirits && matchesAnalcolico;
+        });
+    }, [drinks, deferredSearch, selectedSpirits, analcolicoOnly]);
 
     return (
         <div className="shell page">
@@ -186,7 +198,7 @@ function Explore() {
 
                 {!loading && !error && !isOffline && (
                     <span className="count">
-                        {search.trim() || selectedSpirits.length > 0 || analcolicoOnly
+                        {deferredSearch.trim() || selectedSpirits.length > 0 || analcolicoOnly
                             ? `${filteredDrinks.length} di ${drinks.length} drink`
                             : `${drinks.length} drink`}
                     </span>
@@ -281,8 +293,8 @@ function Explore() {
                 <EmptyState
                     eyebrow="Nessun risultato"
                     title={
-                        search.trim()
-                            ? `Niente che si chiami "${search.trim()}"`
+                        deferredSearch.trim()
+                            ? `Niente che si chiami "${deferredSearch.trim()}"`
                             : analcolicoOnly
                             ? "Nessun drink senza alcolici"
                             : "Nessun drink con questi alcolici"

@@ -10,8 +10,8 @@ import {
 
 import auth from "../firebase/auth";
 
-import { useAuth } from "../context/AuthContext";
-import { readDrinkImage, validateDrinkImage } from "../utils/drinkImage";
+import { useAuth } from "../context/useAuth";
+import { readProfilePhoto, validateDrinkImage } from "../utils/drinkImage";
 import { fetchProfilePhoto, saveProfilePhoto } from "../utils/userProfile";
 
 function EditProfile() {
@@ -19,6 +19,7 @@ function EditProfile() {
 
     const [name, setName] = useState(user?.displayName || "");
     const [photoData, setPhotoData] = useState("");
+    const [photoLoaded, setPhotoLoaded] = useState(false);
     const [imageLoading, setImageLoading] = useState(false);
 
     const [currentPassword, setCurrentPassword] = useState("");
@@ -33,9 +34,22 @@ function EditProfile() {
             return;
         }
 
+        let cancelled = false;
+
         fetchProfilePhoto(user.uid)
-            .then(setPhotoData)
+            .then((saved) => {
+                if (cancelled) {
+                    return;
+                }
+
+                setPhotoData(saved);
+                setPhotoLoaded(true);
+            })
             .catch((fetchError) => console.error(fetchError));
+
+        return () => {
+            cancelled = true;
+        };
     }, [user]);
 
     const handleImageChange = async (event) => {
@@ -57,8 +71,9 @@ function EditProfile() {
         setImageLoading(true);
 
         try {
-            const dataUrl = await readDrinkImage(file);
+            const dataUrl = await readProfilePhoto(file);
             setPhotoData(dataUrl);
+            setPhotoLoaded(true);
         } catch (imageError) {
             console.error(imageError);
             setError("Non è stato possibile leggere l'immagine. Riprova.");
@@ -67,7 +82,10 @@ function EditProfile() {
         }
     };
 
-    const removePhoto = () => setPhotoData("");
+    const removePhoto = () => {
+        setPhotoData("");
+        setPhotoLoaded(true);
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -106,7 +124,12 @@ function EditProfile() {
                 await updateProfile(auth.currentUser, { displayName: trimmedName });
             }
 
-            await saveProfilePhoto(user.uid, photoData);
+            // se il fetch della foto è ancora in corso (o fallito),
+            // photoData è vuoto e salvare adesso cancellerebbe la
+            // foto vecchia senza motivo
+            if (photoLoaded) {
+                await saveProfilePhoto(user.uid, photoData);
+            }
 
             if (wantsPasswordChange) {
                 const credential = EmailAuthProvider.credential(user.email, currentPassword);
@@ -114,8 +137,8 @@ function EditProfile() {
                 await updatePassword(auth.currentUser, newPassword);
             }
 
-            // Ricarico la pagina invece di navigare via router: l'avatar in
-            // navbar viene letto solo al login e non si aggiornerebbe da solo.
+            // ricarico tutta la pagina invece di usare il router perché
+            // l'avatar nella navbar si legge solo al login
             window.location.href = "/profile";
         } catch (submitError) {
             console.error(submitError);
@@ -166,9 +189,27 @@ function EditProfile() {
                                 src={photoData}
                                 alt="Anteprima immagine profilo"
                             />
-                            <button type="button" className="btn btn-outline btn-sm" onClick={removePhoto}>
-                                Rimuovi foto
-                            </button>
+
+                            <div className="image-picker-actions">
+                                <label className="btn btn-outline btn-sm" htmlFor="profile-image">
+                                    Cambia foto
+                                </label>
+                                <button
+                                    type="button"
+                                    className="btn btn-danger-quiet btn-sm"
+                                    onClick={removePhoto}
+                                >
+                                    Rimuovi foto
+                                </button>
+                            </div>
+
+                            <input
+                                id="profile-image"
+                                className="visually-hidden"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                            />
                         </div>
                     ) : (
                         <>

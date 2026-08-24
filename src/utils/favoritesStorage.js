@@ -1,3 +1,5 @@
+import { writeCache } from "./localCache.js";
+
 export const getFavoritesCacheKey = (uid) => `favorite-drinks-${uid}`;
 
 function getStorage() {
@@ -40,14 +42,12 @@ export function writeCachedFavorites(uid, favorites) {
         return;
     }
 
-    try {
-        storage.setItem(
-            getFavoritesCacheKey(uid),
-            JSON.stringify(favorites)
-        );
-    } catch (error) {
-        console.error("Errore salvataggio preferiti cache:", error);
-    }
+    writeCache(
+        storage,
+        getFavoritesCacheKey(uid),
+        favorites,
+        "Errore salvataggio preferiti cache:"
+    );
 }
 
 export function saveFavoriteLocally(uid, drink) {
@@ -86,9 +86,8 @@ export function removeFavoriteLocally(uid, drinkId) {
 export function mergeFavorites(remoteFavorites = [], localFavorites = []) {
     const map = new Map();
 
-    // I dati remoti sono più aggiornati e vanno inseriti per ultimi, così
-    // sovrascrivono la cache. Gli id presenti solo in locale (preferiti
-    // aggiunti offline, non ancora sincronizzati) restano invariati.
+    // metto prima i locali e poi i remoti così i remoti (più aggiornati)
+    // sovrascrivono. quelli che esistono solo offline restano comunque
     [...localFavorites, ...remoteFavorites].forEach((drink) => {
         if (!drink || !drink.id) {
             return;
