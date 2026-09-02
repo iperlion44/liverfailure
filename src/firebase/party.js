@@ -27,6 +27,7 @@ import {
     missingLabel,
     normalizePartyInventory
 } from "../utils/partyInventory";
+import { normalizeEstimatedPeople } from "../utils/partyShopping";
 
 export const ROLE_BAR = "bar";
 export const ROLE_CUSTOMER = "cliente";
@@ -109,7 +110,7 @@ async function findFreeCode(attempts = 6) {
     throw new PartyError("Non riesco a generare un codice libero. Riprova tra un attimo.");
 }
 
-export async function createParty({ user, name, pantry = [] }) {
+export async function createParty({ user, name, pantry = [], estimatedPeople = 0 }) {
     if (!user) {
         throw new PartyError("Devi essere connesso per aprire una festa.");
     }
@@ -133,6 +134,9 @@ export async function createParty({ user, name, pantry = [] }) {
         // nessuno può ancora entrare finché non la avvii
         started: false,
         menuDrinkIds: [],
+        // stima facoltativa degli invitati: la usa solo la scheda "Spesa"
+        // per moltiplicare le dosi. 0 vuol dire "non l'ho indicato"
+        estimatedPeople: normalizeEstimatedPeople(estimatedPeople),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
     });
@@ -358,6 +362,15 @@ export async function setPartyMenu({ code, drinkIds }) {
     const cleaned = [...new Set((drinkIds ?? []).filter((id) => typeof id === "string" && id))].slice(0, 200);
 
     await updateDoc(partyRef(code), { menuDrinkIds: cleaned, updatedAt: serverTimestamp() });
+}
+
+// la stima degli invitati si corregge dalla scheda "Spesa": cambia solo
+// quante bottiglie comprare, non tocca né il menù né il bancone
+export async function setPartyPeople({ code, people }) {
+    await updateDoc(partyRef(code), {
+        estimatedPeople: normalizeEstimatedPeople(people),
+        updatedAt: serverTimestamp()
+    });
 }
 
 export async function startParty({ code }) {

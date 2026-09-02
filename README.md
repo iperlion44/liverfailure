@@ -18,6 +18,7 @@ Ricettario di drink condiviso, fatto con React + Vite e Firebase (Auth + Firesto
 - "Consigliati per te" in home: drink pubblici scelti in base agli ingredienti dei tuoi preferiti
 - Dispensa personale (`/inventory`): segni cosa hai in casa e ogni drink ti dice se lo puoi fare ora o cosa ti manca, con lista della spesa scalabile per N persone
 - Modalità festa (`/party`): uno fa da bar, gli altri ordinano dal telefono, con coda ordini in tempo reale e inventario condiviso che si scala da solo
+- Scheda "Spesa" (solo a festa ferma): dato il menù scelto e le persone attese, dice quanto serve di ogni ingrediente perché ognuno possa ordinare almeno una volta ogni drink, già al netto di quello che c'è sul bancone. Si spunta come una lista della spesa vera — la riga presa si barra e resta al suo posto, e finisce sul bancone con la quantità che serve
 - Profilo utente con foto e password modificabili
 
 I preferiti, i tuoi drink e la dispensa vengono anche tenuti in cache in `localStorage`, così restano leggibili senza connessione.

@@ -271,8 +271,17 @@ service cloud.firestore {
         && getAfter(participantPath(sessionId, request.auth.uid)).data.role == 'bar';
     }
 
+    // "estimatedPeople" e' facoltativo: le feste create prima della
+    // scheda Spesa non ce l'hanno e devono restare modificabili, quindi
+    // lo controllo solo quando c'e' davvero
+    function isValidPeopleEstimate(data) {
+      return !data.keys().hasAny(['estimatedPeople'])
+        || (data.estimatedPeople is int && data.estimatedPeople >= 0 && data.estimatedPeople <= 200);
+    }
+
     function isValidParty(data) {
-      return data.keys().hasOnly(['code', 'name', 'hostId', 'hostName', 'active', 'started', 'menuDrinkIds', 'createdAt', 'updatedAt'])
+      return data.keys().hasOnly(['code', 'name', 'hostId', 'hostName', 'active', 'started', 'menuDrinkIds', 'estimatedPeople', 'createdAt', 'updatedAt'])
+        && isValidPeopleEstimate(data)
         && data.code is string && data.code.size() == 6
         && data.hostId is string
         && data.hostName is string && data.hostName.size() > 0 && data.hostName.size() <= 80

@@ -2526,6 +2526,34 @@ img {
     text-align: center;
 }
 
+/* variante scrivibile dello stepper: le frecce restano per i ritocchi,
+   ma un numero grande (trenta invitati) si batte a mano */
+.stepper-input {
+    width: 3.5rem;
+    padding: 0.2rem 0.35rem;
+    border: none;
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink);
+    text-align: center;
+}
+
+.stepper-input:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+.stepper-unit {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    padding-right: 0.35rem;
+}
+
 /* Pagina dispensa */
 .pantry-group {
     margin-bottom: 2.5rem;
@@ -2864,6 +2892,7 @@ img {
 .party-tab--prepara { --tab-accent: var(--bitter); }
 .party-tab--bancone { --tab-accent: var(--tab-bancone); }
 .party-tab--persone { --tab-accent: var(--tab-persone); }
+.party-tab--spesa { --tab-accent: var(--tab-spesa); }
 
 .party-tab-count {
     display: grid;
@@ -3053,6 +3082,65 @@ a.order-drink:focus-visible {
 
 .shopping-head-have {
     margin-top: 1.5rem;
+}
+
+/* Scheda "Spesa": quanto comprare perché ogni invitato possa ordinare
+   almeno una volta ogni drink del menù. Esiste solo a festa ferma */
+.party-shopping-people {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.party-shopping .shopping {
+    margin-top: 1.25rem;
+}
+
+/* la riga della spesa resta a due colonne come le altre: a sinistra il
+   nome (con sotto il conto in piccolo, quando una parte c'è già), a
+   destra il numero che interessa davvero, cioè quanto manca */
+.shopping-line {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.shopping-note {
+    font-size: 0.78rem;
+    color: var(--ink-3);
+}
+
+/* la riga presa non sparisce e non si sposta: si barra e resta al suo
+   posto, come su un foglietto della spesa vero. La barra sta sul nome e
+   sulla quantità, non sulla casella da rispuntare */
+.shopping-list li.is-bought {
+    color: var(--ink-3);
+}
+
+.shopping-list li.is-bought .shopping-line span,
+.shopping-list li.is-bought .ingredient-qty {
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+
+/* "ce l'hai, ma per quante persone aspetti non basta" non è una
+   mancanza: è un rabbocco, e la nota sotto il nome dice quanto ne hai
+   già. Niente evidenza rossa, sarebbe un allarme sbagliato */
+.shopping-list li.is-short .ingredient-qty {
+    color: var(--ink-2);
+}
+
+.shopping-done {
+    margin-top: 1rem;
+    margin-bottom: 0;
+}
+
+/* l'avviso "non ho salvato le persone" si porta dietro il "Riprova":
+   il numero scritto resta a video, il pulsante lo rimanda e basta */
+.party-shopping .notice .btn {
+    display: inline-flex;
+    margin-left: 0.6rem;
+    vertical-align: middle;
 }
 
 

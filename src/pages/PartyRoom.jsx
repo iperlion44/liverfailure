@@ -22,6 +22,7 @@ import {
     setParticipantRole,
     setPartyActive,
     setPartyMenu,
+    setPartyPeople,
     startOrder,
     startParty,
     subscribeInventory,
@@ -36,30 +37,40 @@ import { usePartyList } from "../context/usePartyList";
 import { normalizeIngredients } from "../utils/drink";
 import { formatPartyCode, normalizePartyCode } from "../utils/partyCode";
 import { emptyPartyInventory } from "../utils/partyInventory";
+import { normalizeEstimatedPeople, toggleBoughtIngredient } from "../utils/partyShopping";
 import { forgetParty, rememberParty } from "../utils/partyStorage";
 import { showNotification } from "../utils/notifications";
 
 import EmptyState from "../components/EmptyState";
 import { Loader } from "../components/Loader";
-import { IconBottle, IconGlass, IconShaker, IconTicket, IconUser } from "../components/NavIcons";
+import { IconBottle, IconCart, IconGlass, IconShaker, IconTicket, IconUser } from "../components/NavIcons";
 import PartyInventoryEditor from "../components/PartyInventoryEditor";
 import PartyMenu from "../components/PartyMenu";
 import PartyOrderQueue, { OrderStatus } from "../components/PartyOrderQueue";
 import PartyParticipants from "../components/PartyParticipants";
 import PartyPlanner from "../components/PartyPlanner";
+import PartyShopping from "../components/PartyShopping";
 
-const BAR_TABS_DRAFT = [
-    { id: "prepara", label: "Prepara", icon: IconShaker },
-    { id: "bancone", label: "Bancone", icon: IconBottle }
-];
+const TAB_CODA = { id: "coda", label: "Coda", icon: IconTicket };
+const TAB_MENU = { id: "menu", label: "Menù", icon: IconGlass };
+const TAB_PREPARA = { id: "prepara", label: "Prepara", icon: IconShaker };
+const TAB_BANCONE = { id: "bancone", label: "Bancone", icon: IconBottle };
+const TAB_SPESA = { id: "spesa", label: "Spesa", icon: IconCart };
+const TAB_PERSONE = { id: "persone", label: "Persone", icon: IconUser };
 
-const BAR_TABS_LIVE = [
-    { id: "coda", label: "Coda", icon: IconTicket },
-    { id: "menu", label: "Menù", icon: IconGlass },
-    { id: "prepara", label: "Prepara", icon: IconShaker },
-    { id: "bancone", label: "Bancone", icon: IconBottle },
-    { id: "persone", label: "Persone", icon: IconUser }
-];
+// la spesa ha senso solo mentre la festa è ferma: in preparazione, per
+// sapere cosa comprare prima di aprire le porte, e a festa fermata, per
+// rifare i conti prima di riaprire. Quando si sta servendo sparisce:
+// lì conta il bancone, cioè quello che c'è adesso davvero
+const BAR_TABS_DRAFT = [TAB_PREPARA, TAB_BANCONE, TAB_SPESA];
+
+const BAR_TABS_LIVE = [TAB_CODA, TAB_MENU, TAB_PREPARA, TAB_BANCONE, TAB_PERSONE];
+
+const BAR_TABS_STOPPED = [TAB_CODA, TAB_MENU, TAB_PREPARA, TAB_BANCONE, TAB_SPESA, TAB_PERSONE];
+
+// le frecce del contatore si premono a raffica: aspetto che l'host si
+// fermi prima di scrivere il numero sulla festa
+const PEOPLE_SAVE_DEBOUNCE_MS = 600;
 
 const CUSTOMER_TABS = [
     { id: "menu", label: "Menù", icon: IconGlass },
@@ -88,6 +99,12 @@ function PartyRoomView({ code, initialTab }) {
     const [copied, setCopied] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [clearingHistory, setClearingHistory] = useState(false);
+    const [peopleDraft, setPeopleDraft] = useState(null);
+    const [peopleSaveFailed, setPeopleSaveFailed] = useState(false);
+
+    const peopleTimer = useRef(null);
+
+    useEffect(() => () => clearTimeout(peopleTimer.current), []);
 
     const isParticipant = Boolean(myParticipant);
     const isHost = Boolean(party && user && party.hostId === user.uid);
@@ -206,6 +223,21 @@ function PartyRoomView({ code, initialTab }) {
         return catalog.filter((drink) => party.menuDrinkIds.includes(drink.id));
     }, [catalog, party]);
 
+    // per la spesa contano solo i drink scelti davvero: le feste vecchie
+    // senza menuDrinkIds ordinano da tutta la libreria, ma non ha senso
+    // fare la spesa per ogni drink pubblico che esiste
+    // quello appena scritto vince su quello salvato finché non arriva sul
+    // server; da un altro dispositivo il numero cambia da solo
+    const savedPeople = normalizeEstimatedPeople(party?.estimatedPeople);
+    const people = peopleDraft ?? Math.max(1, savedPeople);
+    const peopleNotSet = peopleDraft === null && savedPeople === 0;
+
+    const chosenDrinks = useMemo(() => {
+        const chosen = new Set(Array.isArray(party?.menuDrinkIds) ? party.menuDrinkIds : []);
+
+        return catalog.filter((drink) => chosen.has(drink.id));
+    }, [catalog, party]);
+
     // notifica locale quando un mio ordine cambia stato: non c'è push
     // cross-dispositivo, ma se la scheda è aperta l'aggiornamento arriva
     // da onSnapshot e tanto basta
@@ -264,7 +296,9 @@ function PartyRoomView({ code, initialTab }) {
     // reimpostarle a mano ricado sulla prima valida, così il passaggio
     // da cliente a bar non mi lascia su una scheda che non esiste più
     const isDraft = party?.started === false;
-    const tabs = isBar ? (isDraft ? BAR_TABS_DRAFT : BAR_TABS_LIVE) : CUSTOMER_TABS;
+    const isStopped = party?.active === false;
+    const barTabs = isDraft ? BAR_TABS_DRAFT : isStopped ? BAR_TABS_STOPPED : BAR_TABS_LIVE;
+    const tabs = isBar ? barTabs : CUSTOMER_TABS;
     const activeTab = tabs.some((entry) => entry.id === tab) ? tab : tabs[0].id;
 
     const runAction = useCallback(async (id, action) => {
@@ -351,6 +385,15 @@ function PartyRoomView({ code, initialTab }) {
         }
     };
 
+    // spuntare una riga della spesa è una modifica del bancone come le
+    // altre: passa dallo stesso salvataggio in transazione, così non
+    // scavalca quello che un altro bar sta facendo nel frattempo
+    const handleToggleBought = (row, bought) =>
+        handleSaveInventory({
+            base: inventory,
+            inventory: toggleBoughtIngredient(inventory, row, bought)
+        });
+
     const handleClearHistory = async () => {
         if (
             !window.confirm(
@@ -381,6 +424,36 @@ function PartyRoomView({ code, initialTab }) {
             await setPartyMenu({ code, drinkIds: next });
             refreshPartyList();
         });
+
+    // Il numero di invitati è una decisione dell'host e resta quello che
+    // ha scritto: non lo tocca la scorta del bancone (gli ingredienti che
+    // non bastano si comprano, non si invitano meno persone) e non lo
+    // riporta indietro un salvataggio andato storto. Vive qui e non nella
+    // scheda Spesa perché l'attesa prima di scrivere sul server sopravvive
+    // al cambio scheda: sennò chi scrive "30" e salta subito al bancone a
+    // vedere cosa manca perderebbe il numero appena messo.
+    const savePeople = useCallback(
+        (next) => {
+            setPeopleDraft(next);
+            setPeopleSaveFailed(false);
+            clearTimeout(peopleTimer.current);
+
+            peopleTimer.current = setTimeout(async () => {
+                try {
+                    await setPartyPeople({ code, people: next });
+
+                    // se nel frattempo l'ho cambiato ancora, ci pensa il
+                    // salvataggio dopo: torno a seguire la festa solo se il
+                    // numero è ancora quello che ho appena mandato
+                    setPeopleDraft((previous) => (previous === next ? null : previous));
+                } catch (error) {
+                    console.error(error);
+                    setPeopleSaveFailed(true);
+                }
+            }, PEOPLE_SAVE_DEBOUNCE_MS);
+        },
+        [code]
+    );
 
     const handleStartParty = async () => {
         setActionError("");
@@ -607,6 +680,21 @@ function PartyRoomView({ code, initialTab }) {
                     onSave={handleSaveInventory}
                     saving={savingInventory}
                     menuDrinks={menu}
+                />
+            )}
+
+            {activeTab === "spesa" && isBar && (
+                <PartyShopping
+                    drinks={chosenDrinks}
+                    inventory={inventory}
+                    pantry={pantry}
+                    people={people}
+                    peopleNotSet={peopleNotSet}
+                    saveFailed={peopleSaveFailed}
+                    canEdit={isHost}
+                    onChangePeople={savePeople}
+                    onRetryPeople={() => savePeople(people)}
+                    onToggleBought={handleToggleBought}
                 />
             )}
 

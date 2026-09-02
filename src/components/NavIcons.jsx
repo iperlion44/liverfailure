@@ -110,6 +110,16 @@ function IconShaker() {
     );
 }
 
+function IconCart() {
+    return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M1.6 2.2H3.4L5 9.6H12.1L13.6 4.4H4" />
+            <circle cx="5.9" cy="12.7" r="1.1" />
+            <circle cx="11.4" cy="12.7" r="1.1" />
+        </svg>
+    );
+}
+
 export {
     IconSearch,
     IconGlass,
@@ -121,5 +131,6 @@ export {
     IconHome,
     IconPlus,
     IconTicket,
-    IconShaker
+    IconShaker,
+    IconCart
 };

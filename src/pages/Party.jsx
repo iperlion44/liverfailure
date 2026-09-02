@@ -14,6 +14,7 @@ import { useAuth } from "../context/useAuth";
 import { useInventory } from "../context/useInventory";
 import { usePartyList } from "../context/usePartyList";
 import { formatPartyCode, isValidPartyCode, normalizePartyCode } from "../utils/partyCode";
+import { MAX_PARTY_PEOPLE, MIN_PARTY_PEOPLE } from "../utils/partyShopping";
 import { forgetParty, readRememberedParties, rememberParty } from "../utils/partyStorage";
 
 function Party() {
@@ -23,6 +24,9 @@ function Party() {
     const navigate = useNavigate();
 
     const [name, setName] = useState("");
+    // facoltativo: se lo indichi, la scheda "Spesa" della festa sa già
+    // per quante persone moltiplicare le dosi
+    const [people, setPeople] = useState("");
     const [usePantry, setUsePantry] = useState(true);
     const [creating, setCreating] = useState(false);
     const [createError, setCreateError] = useState("");
@@ -124,7 +128,8 @@ function Party() {
             const newCode = await createParty({
                 user,
                 name,
-                pantry: usePantry && !pantryLoading ? inventory : []
+                pantry: usePantry && !pantryLoading ? inventory : [],
+                estimatedPeople: people
             });
 
             rememberParty(user.uid, { code: newCode, name, role: "bar" });
@@ -286,6 +291,28 @@ function Party() {
                                 maxLength={PARTY_NAME_MAX_LENGTH}
                                 onChange={(event) => setName(event.target.value)}
                             />
+                        </div>
+
+                        <div className="field">
+                            <label className="field-label" htmlFor="party-people">
+                                Quante persone (facoltativo)
+                            </label>
+                            <input
+                                id="party-people"
+                                className="input"
+                                type="number"
+                                inputMode="numeric"
+                                min={MIN_PARTY_PEOPLE}
+                                max={MAX_PARTY_PEOPLE}
+                                step="1"
+                                placeholder="12"
+                                value={people}
+                                onChange={(event) => setPeople(event.target.value)}
+                            />
+                            <span className="field-hint">
+                                Serve alla scheda &quot;Spesa&quot;: quanto comprare perché ognuno possa
+                                ordinare almeno una volta ogni drink. Si cambia anche dopo.
+                            </span>
                         </div>
 
                         {/* finché la dispensa non è arrivata risulterebbe vuota

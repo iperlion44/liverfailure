@@ -56,7 +56,7 @@ function Home() {
                     <span className="hero-mark" />
 
                     <h1 className="display display-xl hero-title">
-                        Le ricette dei drink che prepariamo davvero
+                        Il tuo cocktail bar
                     </h1>
 
                     <form className="hero-search" onSubmit={handleHeroSearch} role="search">
