@@ -4,6 +4,8 @@ import { registerSW } from "virtual:pwa-register";
 
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
+import { InventoryProvider } from "./context/InventoryContext";
+import { PartyListProvider } from "./context/PartyListContext";
 
 import "./styles/reset.css";
 import "./styles/variables.css";
@@ -14,7 +16,11 @@ registerSW({ immediate: true });
 ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
         <AuthProvider>
-            <App />
+            <InventoryProvider>
+                <PartyListProvider>
+                    <App />
+                </PartyListProvider>
+            </InventoryProvider>
         </AuthProvider>
     </React.StrictMode>
 );

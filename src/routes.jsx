@@ -11,6 +11,9 @@ import EditProfile from "./pages/EditProfile";
 import CreateDrink from "./pages/CreateDrink";
 import EditDrink from "./pages/EditDrink";
 import DrinkDetails from "./pages/DrinkDetails";
+import Inventory from "./pages/Inventory";
+import Party from "./pages/Party";
+import PartyRoom from "./pages/PartyRoom";
 
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -35,6 +38,9 @@ function AppRoutes() {
                         <Route path="/profile/edit" element={<EditProfile />} />
                         <Route path="/create-drink" element={<CreateDrink />} />
                         <Route path="/edit-drink/:id" element={<EditDrink />} />
+                        <Route path="/inventory" element={<Inventory />} />
+                        <Route path="/party" element={<Party />} />
+                        <Route path="/party/:code" element={<PartyRoom />} />
                     </Route>
                 </Route>
             </Routes>

@@ -11,10 +11,13 @@ import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/fire
 
 import auth from "../firebase/auth";
 import db from "../firebase/firestore";
+import { deleteReview, fetchMyReviewRefs } from "../firebase/reviews";
 
 import { useAuth } from "../context/useAuth";
 import { getFavoritesCacheKey, readCachedFavorites } from "../utils/favoritesStorage";
+import { getInventoryCacheKey } from "../utils/inventoryStorage";
 import { getMyDrinksCacheKey } from "../utils/myDrinksStorage";
+import { getPartiesCacheKey } from "../utils/partyStorage";
 import { initialOf } from "../utils/drink";
 import { fetchProfilePhoto } from "../utils/userProfile";
 
@@ -111,6 +114,20 @@ function Profile() {
             // fine l'utente auth: le regole di sicurezza si basano su
             // request.auth, se elimino l'utente prima questi delete
             // verrebbero rifiutati
+
+            // le recensioni che ho lasciato stanno sparse sotto i drink
+            // degli altri: le tolgo una per una così ogni media torna
+            // giusta invece di restare gonfiata da un utente che non c'è più
+            const myReviews = await fetchMyReviewRefs(user.uid);
+
+            for (const review of myReviews) {
+                try {
+                    await deleteReview({ drinkId: review.drinkId, uid: user.uid });
+                } catch (reviewError) {
+                    console.error(reviewError);
+                }
+            }
+
             const drinksSnapshot = await getDocs(
                 query(collection(db, "drinks"), where("authorId", "==", user.uid))
             );
@@ -125,6 +142,8 @@ function Profile() {
             // ritrova in cache i drink/preferiti di un account cancellato
             localStorage.removeItem(getFavoritesCacheKey(user.uid));
             localStorage.removeItem(getMyDrinksCacheKey(user.uid));
+            localStorage.removeItem(getInventoryCacheKey(user.uid));
+            localStorage.removeItem(getPartiesCacheKey(user.uid));
 
             await deleteUser(auth.currentUser);
 
@@ -199,6 +218,9 @@ function Profile() {
                 </Link>
                 <Link to="/my-drinks" className="btn btn-outline">
                     Gestisci i tuoi drink
+                </Link>
+                <Link to="/favorites" className="btn btn-outline">
+                    Vai ai preferiti
                 </Link>
                 <button type="button" className="btn btn-danger-quiet" onClick={handleLogout}>
                     Esci

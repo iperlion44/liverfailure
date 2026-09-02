@@ -7,23 +7,61 @@ import { Link } from "react-router-dom";
 import db from "../firebase/firestore";
 
 import { useAuth } from "../context/useAuth";
+import { useInventory } from "../context/useInventory";
+import { matchDrink } from "../utils/inventoryMatch";
 import {
     mergeFavorites,
     readCachedFavorites,
     removeFavoriteLocally,
     writeCachedFavorites
 } from "../utils/favoritesStorage";
+import { usePartyPicker } from "../utils/usePartyPicker";
 
 import DrinkCard from "../components/DrinkCard";
 import EmptyState from "../components/EmptyState";
+import PartyPickerModal from "../components/PartyPickerModal";
 import { DrinkGridSkeleton } from "../components/Loader";
+import { IconSearch } from "../components/NavIcons";
 
 function Favorites() {
     const { user } = useAuth();
+    const { inventorySet } = useInventory();
+    const party = usePartyPicker();
 
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isCached, setIsCached] = useState(false);
+    const [removingId, setRemovingId] = useState(null);
+
+    // qui la stellina è sempre "piena": cliccarla toglie il drink dai
+    // preferiti e lo fa sparire subito dalla griglia
+    const handleRemoveFavorite = async (drink) => {
+        if (!user) {
+            return;
+        }
+
+        setRemovingId(drink.id);
+        removeFavoriteLocally(user.uid, drink.id);
+
+        const nextFavorites = favorites.filter((favorite) => favorite.id !== drink.id);
+
+        setFavorites(nextFavorites);
+        writeCachedFavorites(user.uid, nextFavorites);
+
+        try {
+            if (!navigator.onLine) {
+                throw new Error("Offline");
+            }
+
+            await deleteDoc(doc(db, "users", user.uid, "favorites", drink.id));
+        } catch (error) {
+            // offline o errore di rete: la rimozione resta comunque sul
+            // dispositivo e si sincronizza appena torna la connessione
+            console.error(error);
+        } finally {
+            setRemovingId(null);
+        }
+    };
 
     useEffect(() => {
         const fetchFavorites = async () => {
@@ -110,12 +148,7 @@ function Favorites() {
         <div className="shell page">
             <header className="page-head">
                 <div className="page-head-text">
-                    <span className="eyebrow">La tua selezione</span>
                     <h1 className="display display-l">Preferiti</h1>
-                    <p className="lede">
-                        I drink che hai messo da parte. Restano
-                        leggibili anche senza connessione.
-                    </p>
                 </div>
 
                 {!loading && favorites.length > 0 && (
@@ -125,6 +158,12 @@ function Favorites() {
                     </span>
                 )}
             </header>
+
+            {party.partyNotice && (
+                <div className="notice" role="status">
+                    {party.partyNotice.text} <Link to={`/party/${party.partyNotice.code}`}>Vai alla festa</Link>.
+                </div>
+            )}
 
             {isCached && favorites.length > 0 && (
                 <div className="notice">
@@ -136,12 +175,9 @@ function Favorites() {
             {loading && <DrinkGridSkeleton count={3} />}
 
             {!loading && favorites.length === 0 && (
-                <EmptyState
-                    eyebrow="Nessun preferito"
-                    title="Non hai ancora salvato niente"
-                    body="Apri un drink in Esplora e salvalo: lo ritrovi qui, anche senza connessione."
-                >
-                    <Link to="/explore" className="btn btn-primary">
+                <EmptyState title="Non hai ancora salvato niente">
+                    <Link to="/explore" className="btn btn-primary btn-hero">
+                        <IconSearch />
                         Vai a Esplora
                     </Link>
                 </EmptyState>
@@ -151,10 +187,32 @@ function Favorites() {
                 <div className="drink-grid">
                     {favorites.map((drink) => (
                         <Link key={drink.id} to={`/drink/${drink.id}`}>
-                            <DrinkCard drink={drink} />
+                            <DrinkCard
+                                drink={drink}
+                                match={matchDrink(drink.ingredients, inventorySet)}
+                                partyAction={party.partyActionFor(drink, user)}
+                                favoriteAction={{
+                                    active: true,
+                                    pending: removingId === drink.id,
+                                    onToggle: () => handleRemoveFavorite(drink)
+                                }}
+                            />
                         </Link>
                     ))}
                 </div>
+            )}
+
+            {party.pickerDrink && (
+                <PartyPickerModal
+                    drink={party.pickerDrink}
+                    parties={party.openParties}
+                    pendingPartyId={party.pendingPartyId}
+                    creating={party.creatingParty}
+                    error={party.partyListError}
+                    onToggleParty={party.handleToggleParty}
+                    onCreateParty={party.handleCreateParty}
+                    onClose={() => party.setPickerDrink(null)}
+                />
             )}
         </div>
     );

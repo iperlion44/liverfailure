@@ -11,6 +11,18 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function drinkPath(drinkId) {
+      return /databases/$(database)/documents/drinks/$(drinkId);
+    }
+
+    // stesso criterio della lettura di un drink: pubblico per tutti,
+    // privato solo per chi l'ha scritto
+    function canReadDrink(drinkId) {
+      return exists(drinkPath(drinkId))
+        && (get(drinkPath(drinkId)).data.isPublic == true
+            || isOwner(get(drinkPath(drinkId)).data.authorId));
+    }
+
     function isValidDrink(data) {
       return data.authorId is string
         && data.name is string && data.name.size() > 0
@@ -36,13 +48,335 @@ service cloud.firestore {
       allow delete: if isOwner(resource.data.authorId);
     }
 
+
+    /* =====================================================
+       RECENSIONI
+       Una per utente per drink, garantita dalla struttura:
+       l'id del documento e' l'uid di chi la scrive.
+    ===================================================== */
+
+    function isValidReview(data, userId) {
+      return data.keys().hasOnly(['rating', 'comment', 'authorId', 'authorName', 'createdAt', 'updatedAt'])
+        && data.authorId == userId
+        && data.rating is int && data.rating >= 1 && data.rating <= 5
+        && data.authorName is string && data.authorName.size() > 0 && data.authorName.size() <= 80
+        && data.comment is string && data.comment.size() <= 300;
+    }
+
+    function ratingPath(drinkId) {
+      return /databases/$(database)/documents/drinkRatings/$(drinkId);
+    }
+
+    // un aggregato che non esiste vale zero voti: cosi' la prima
+    // recensione di un drink e' un caso normale e non un'eccezione
+    function ratingCountBefore(drinkId) {
+      return exists(ratingPath(drinkId)) ? get(ratingPath(drinkId)).data.ratingCount : 0;
+    }
+
+    function ratingTotalBefore(drinkId) {
+      return exists(ratingPath(drinkId)) ? get(ratingPath(drinkId)).data.ratingTotal : 0;
+    }
+
+    function ratingCountAfter(drinkId) {
+      return existsAfter(ratingPath(drinkId)) ? getAfter(ratingPath(drinkId)).data.ratingCount : 0;
+    }
+
+    function ratingTotalAfter(drinkId) {
+      return existsAfter(ratingPath(drinkId)) ? getAfter(ratingPath(drinkId)).data.ratingTotal : 0;
+    }
+
+    match /drinks/{drinkId}/reviews/{userId} {
+      // la propria recensione si legge sempre: se il drink viene
+      // cancellato o reso privato, canReadDrink diventa falso e senza
+      // questa aggiunta non si riuscirebbe piu' nemmeno a rileggerla
+      // per cancellarla (la transazione parte da una get)
+      allow read: if canReadDrink(drinkId) || isOwner(userId);
+
+      // l'autore non vota la propria ricetta, sarebbe troppo comodo.
+      // La recensione e l'aggregato devono muoversi insieme, altrimenti
+      // si potrebbe votare senza far salire il contatore
+      allow create: if isOwner(userId)
+        && canReadDrink(drinkId)
+        && get(drinkPath(drinkId)).data.authorId != request.auth.uid
+        && isValidReview(request.resource.data, userId)
+        && ratingCountAfter(drinkId) == ratingCountBefore(drinkId) + 1
+        && ratingTotalAfter(drinkId) == ratingTotalBefore(drinkId) + request.resource.data.rating;
+
+      allow update: if isOwner(userId)
+        && canReadDrink(drinkId)
+        && get(drinkPath(drinkId)).data.authorId != request.auth.uid
+        && isValidReview(request.resource.data, userId)
+        && ratingCountAfter(drinkId) == ratingCountBefore(drinkId)
+        && ratingTotalAfter(drinkId) ==
+             ratingTotalBefore(drinkId) - resource.data.rating + request.resource.data.rating;
+
+      allow delete: if isOwner(userId)
+        && ratingCountAfter(drinkId) == ratingCountBefore(drinkId) - 1
+        && ratingTotalAfter(drinkId) == ratingTotalBefore(drinkId) - resource.data.rating;
+    }
+
+    // le mie recensioni sono sparse sotto i drink di tutti: senza una
+    // query di gruppo non riuscirei a cancellarle quando elimino il profilo
+    match /{path=**}/reviews/{reviewId} {
+      allow list: if isSignedIn() && resource.data.authorId == request.auth.uid;
+    }
+
+
+    /* =====================================================
+       MEDIA VOTI
+       Documento a parte perche' la regola update su /drinks
+       richiede isOwner: l'aggregato lo scrive chi recensisce,
+       non l'autore del drink.
+
+       Ci tengo la SOMMA dei voti e non la media, perche' la somma
+       la posso verificare qui dentro: "il totale e' cambiato
+       esattamente del voto che stai toccando". Con una media
+       chiunque avesse gia' una recensione su quel drink potrebbe
+       scriverci dentro il numero che preferisce.
+    ===================================================== */
+
+    function myReviewPath(drinkId) {
+      return /databases/$(database)/documents/drinks/$(drinkId)/reviews/$(request.auth.uid);
+    }
+
+    function myRatingBefore(drinkId) {
+      return get(myReviewPath(drinkId)).data.rating;
+    }
+
+    function myRatingAfter(drinkId) {
+      return getAfter(myReviewPath(drinkId)).data.rating;
+    }
+
+    function isValidRatingDoc(data) {
+      return data.keys().hasOnly(['ratingTotal', 'ratingCount', 'updatedAt'])
+        && data.ratingCount is int && data.ratingCount >= 0
+        && data.ratingTotal is int && data.ratingTotal >= 0
+        && data.ratingTotal <= data.ratingCount * 5
+        && data.ratingTotal >= data.ratingCount
+        && data.updatedAt is timestamp;
+    }
+
+    function countDelta() {
+      return request.resource.data.ratingCount - resource.data.ratingCount;
+    }
+
+    function totalDelta() {
+      return request.resource.data.ratingTotal - resource.data.ratingTotal;
+    }
+
+    // conteggio e totale si muovono insieme, e solo di quanto vale la
+    // MIA recensione, che devo davvero star creando / cambiando /
+    // togliendo in questo stesso commit
+    function ratingFollowsMyReview(drinkId) {
+      return (countDelta() == 1
+          && !exists(myReviewPath(drinkId)) && existsAfter(myReviewPath(drinkId))
+          && totalDelta() == myRatingAfter(drinkId))
+        || (countDelta() == 0
+          && exists(myReviewPath(drinkId)) && existsAfter(myReviewPath(drinkId))
+          && totalDelta() == myRatingAfter(drinkId) - myRatingBefore(drinkId))
+        || (countDelta() == -1
+          && exists(myReviewPath(drinkId)) && !existsAfter(myReviewPath(drinkId))
+          && totalDelta() == 0 - myRatingBefore(drinkId));
+    }
+
+    match /drinkRatings/{drinkId} {
+      // sono due numeri per un drink: li legge chiunque veda Esplora,
+      // anche senza account
+      allow read: if true;
+
+      allow create: if isSignedIn()
+        && isValidRatingDoc(request.resource.data)
+        && ((request.resource.data.ratingCount == 1
+              && existsAfter(myReviewPath(drinkId))
+              && request.resource.data.ratingTotal == myRatingAfter(drinkId))
+            || (request.resource.data.ratingCount == 0
+              && request.resource.data.ratingTotal == 0
+              && !existsAfter(myReviewPath(drinkId))));
+
+      allow update: if isSignedIn()
+        && isValidRatingDoc(request.resource.data)
+        && ratingFollowsMyReview(drinkId);
+
+      // l'aggregato non si cancella: si azzera scrivendo zero
+      allow delete: if false;
+    }
+
+
+    /* =====================================================
+       UTENTI
+       Il campo inventory e' la dispensa personale.
+    ===================================================== */
+
+    function isValidUserDoc(data) {
+      return !('inventory' in data)
+        || (data.inventory is list && data.inventory.size() <= 200);
+    }
+
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidUserDoc(request.resource.data);
     }
 
     match /users/{userId}/favorites/{drinkId} {
       allow read, write: if isOwner(userId);
     }
+
+
+    /* =====================================================
+       MODALITA' FESTA
+       L'id della sessione E' il codice: cosi' chi lo conosce
+       legge quel singolo documento (get) ma nessuno puo'
+       sfogliare le feste degli altri (list negato).
+
+       Nelle regole di scrittura uso getAfter/existsAfter e non
+       get/exists perche' sessione, host e inventario nascono
+       nello stesso batch: con get() la festa non esisterebbe
+       ancora e la regola boccerebbe la propria creazione.
+    ===================================================== */
+
+    function partyPath(sessionId) {
+      return /databases/$(database)/documents/partySessions/$(sessionId);
+    }
+
+    function participantPath(sessionId, userId) {
+      return /databases/$(database)/documents/partySessions/$(sessionId)/participants/$(userId);
+    }
+
+    // --- versioni per le letture ---
+    function isParticipant(sessionId) {
+      return isSignedIn() && exists(participantPath(sessionId, request.auth.uid));
+    }
+
+    // --- versioni per le scritture ---
+    function isHostAfter(sessionId) {
+      return isSignedIn() && getAfter(partyPath(sessionId)).data.hostId == request.auth.uid;
+    }
+
+    function isPartyActiveAfter(sessionId) {
+      return getAfter(partyPath(sessionId)).data.active == true;
+    }
+
+    // "started" separa la preparazione (si sceglie il menù, nessuno
+    // entra) dalla festa vera e propria aperta agli ospiti
+    function isPartyStartedAfter(sessionId) {
+      return getAfter(partyPath(sessionId)).data.started == true;
+    }
+
+    function isParticipantAfter(sessionId) {
+      return isSignedIn() && existsAfter(participantPath(sessionId, request.auth.uid));
+    }
+
+    function isBartenderAfter(sessionId) {
+      return isParticipantAfter(sessionId)
+        && getAfter(participantPath(sessionId, request.auth.uid)).data.role == 'bar';
+    }
+
+    function isValidParty(data) {
+      return data.keys().hasOnly(['code', 'name', 'hostId', 'hostName', 'active', 'started', 'menuDrinkIds', 'createdAt', 'updatedAt'])
+        && data.code is string && data.code.size() == 6
+        && data.hostId is string
+        && data.hostName is string && data.hostName.size() > 0 && data.hostName.size() <= 80
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 60
+        && data.active is bool
+        && data.started is bool
+        && data.menuDrinkIds is list && data.menuDrinkIds.size() <= 200;
+    }
+
+    match /partySessions/{sessionId} {
+      // con il codice si legge il singolo documento, ma la collection
+      // non si elenca: l'unica list ammessa e' "le feste che ho aperto io"
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && resource.data.hostId == request.auth.uid;
+
+      allow create: if isSignedIn()
+        && request.resource.data.hostId == request.auth.uid
+        && request.resource.data.code == sessionId
+        && isValidParty(request.resource.data);
+
+      allow update: if isOwner(resource.data.hostId)
+        && request.resource.data.hostId == resource.data.hostId
+        && request.resource.data.code == resource.data.code
+        && isValidParty(request.resource.data);
+
+      allow delete: if isOwner(resource.data.hostId);
+    }
+
+    match /partySessions/{sessionId}/participants/{userId} {
+      // il proprio documento si legge sempre: serve a sapere se sono
+      // gia' dentro prima ancora di esserci
+      allow get: if isOwner(userId) || isParticipant(sessionId);
+      allow list: if isParticipant(sessionId);
+
+      // ci si aggiunge da soli come clienti, ma solo a festa avviata.
+      // il ruolo bar se lo da' l'host quando crea la festa (ancora in
+      // preparazione), agli altri lo assegna lui in seguito
+      allow create: if isOwner(userId)
+        && isPartyActiveAfter(sessionId)
+        && request.resource.data.keys().hasOnly(['displayName', 'role', 'joinedAt'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 80
+        && ((request.resource.data.role == 'cliente' && isPartyStartedAfter(sessionId))
+            || (request.resource.data.role == 'bar' && isHostAfter(sessionId)));
+
+      // l'host cambia il ruolo e nient'altro
+      allow update: if isHostAfter(sessionId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role'])
+        && (request.resource.data.role == 'bar' || request.resource.data.role == 'cliente');
+
+      allow delete: if isOwner(userId) || isHostAfter(sessionId);
+    }
+
+    function isValidOrder(data) {
+      return data.keys().hasOnly(['drinkId', 'drinkName', 'requestedBy', 'requestedByName',
+                                  'status', 'preparedBy', 'createdAt', 'updatedAt'])
+        && data.drinkId is string && data.drinkId.size() > 0
+        && data.drinkName is string && data.drinkName.size() > 0 && data.drinkName.size() <= 120
+        && data.requestedBy is string
+        && data.requestedByName is string && data.requestedByName.size() <= 80
+        && data.preparedBy is string;
+    }
+
+    match /partySessions/{sessionId}/orders/{orderId} {
+      allow read: if isParticipant(sessionId);
+
+      allow create: if isParticipantAfter(sessionId)
+        && isPartyActiveAfter(sessionId)
+        && isPartyStartedAfter(sessionId)
+        && request.resource.data.requestedBy == request.auth.uid
+        && request.resource.data.status == 'in coda'
+        && isValidOrder(request.resource.data);
+
+      // il bar fa avanzare lo stato; il cliente puo' solo annullare il
+      // proprio ordine, e solo finche' e' ancora in coda
+      allow update: if (isBartenderAfter(sessionId)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'preparedBy', 'updatedAt'])
+            && request.resource.data.status in ['in coda', 'in preparazione', 'pronto', 'annullato'])
+        || (isOwner(resource.data.requestedBy)
+            && resource.data.status == 'in coda'
+            && request.resource.data.status == 'annullato'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']));
+
+      allow delete: if isHostAfter(sessionId);
+    }
+
+    match /partySessions/{sessionId}/inventory/{documentId} {
+      allow read: if isParticipant(sessionId);
+
+      // scrivono solo i bar: e' la stessa scrittura che la transazione
+      // usa per scalare le dosi quando un ordine diventa pronto
+      allow create, update: if isBartenderAfter(sessionId)
+        && request.resource.data.keys().hasOnly(['amounts', 'extras', 'removedDrinks', 'updatedAt'])
+        && request.resource.data.amounts is map
+        && request.resource.data.amounts.keys().size() <= 120
+        && request.resource.data.extras is list
+        && request.resource.data.extras.size() <= 60
+        && request.resource.data.removedDrinks is list
+        && request.resource.data.removedDrinks.size() <= 200;
+
+      allow delete: if isHostAfter(sessionId);
+    }
+
 
     match /{document=**} {
       allow read, write: if false;

@@ -1,20 +1,47 @@
-import { Suspense, lazy } from "react";
-import { Link } from "react-router-dom";
+import { Suspense, lazy, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/useAuth";
 import { useMediaQuery } from "../utils/useMediaQuery";
+import { IconBottle, IconGlass, IconParty, IconSearch, IconStar } from "../components/NavIcons";
 
 // le colonne con le foto sono solo decorative ma leggono da firestore,
 // quindi le carico in lazy per non appesantire il bundle della home
 const DrinkMarquee = lazy(() => import("../components/DrinkMarquee"));
 
+// i consigli servono solo a chi è loggato e leggono mezza libreria:
+// fuori dal bundle della home, che deve restare leggera per chi arriva
+// da fuori senza account
+const Recommendations = lazy(() => import("../components/Recommendations"));
+
 // stessa soglia di .marquee in global.css. sotto questa larghezza il
 // CSS le nasconde comunque quindi non ha senso nemmeno montarle
-const MARQUEE_BREAKPOINT = "(min-width: 1500px)";
+const MARQUEE_BREAKPOINT = "(min-width: 1380px)";
+
+// le funzioni piu' recenti (dispensa e festa) non compaiono da nessuna
+// parte in home, solo nei link di testo della navbar: chi torna dopo
+// essersi registrato le ritrova qui, con la stessa icona della barra.
+// Nome e icona bastano: la riga di spiegazione sotto ognuna la
+// leggeva nessuno, e faceva quattro riquadri di testo invece di
+// quattro bersagli grossi da toccare
+const SHORTCUTS = [
+    { to: "/inventory", icon: IconBottle, title: "Dispensa" },
+    { to: "/party", icon: IconParty, title: "Festa" },
+    { to: "/my-drinks", icon: IconGlass, title: "I miei drink" },
+    { to: "/favorites", icon: IconStar, title: "Preferiti" }
+];
 
 function Home() {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const showsMarquee = useMediaQuery(MARQUEE_BREAKPOINT);
+    const [heroSearch, setHeroSearch] = useState("");
+
+    const handleHeroSearch = (event) => {
+        event.preventDefault();
+        const query = heroSearch.trim();
+        navigate(query ? `/explore?q=${encodeURIComponent(query)}` : "/explore");
+    };
 
     return (
         <>
@@ -27,70 +54,69 @@ function Home() {
             <section className="shell hero">
                 <div className="hero-label">
                     <span className="hero-mark" />
-                    <span className="eyebrow hero-eyebrow">Ricettario condiviso</span>
 
                     <h1 className="display display-xl hero-title">
                         Le ricette dei drink che prepariamo davvero
                     </h1>
 
-                    <p className="lede hero-lede">
-                        Una raccolta di ricette scritte da chi i drink
-                        li beve per davvero. Cerca quella che ti serve,
-                        o aggiungi quella che manca.
-                    </p>
+                    <form className="hero-search" onSubmit={handleHeroSearch} role="search">
+                        <span className="visually-hidden" id="hero-search-label">
+                            Cerca un drink per nome
+                        </span>
+                        <span className="hero-search-field">
+                            <span className="hero-search-icon" aria-hidden="true">
+                                <IconSearch />
+                            </span>
+                            <input
+                                type="search"
+                                className="hero-search-input"
+                                aria-labelledby="hero-search-label"
+                                placeholder="Cerca un drink, es. Negroni"
+                                value={heroSearch}
+                                onChange={(event) => setHeroSearch(event.target.value)}
+                            />
+                        </span>
+                        <button type="submit" className="btn btn-primary hero-search-btn">
+                            Cerca
+                        </button>
+                    </form>
+
+                    <span className="hero-or">oppure</span>
 
                     <div className="hero-actions">
-                        <Link to="/explore" className="btn btn-primary">
-                            Esplora i drink
+                        <Link to="/explore" className="btn btn-outline btn-hero">
+                            Sfoglia tutto
                         </Link>
-                        <Link to={user ? "/create-drink" : "/register"} className="btn btn-outline">
-                            {user ? "Crea un drink" : "Crea il tuo account"}
+                        <Link
+                            to={user ? "/create-drink" : "/register"}
+                            className="btn btn-outline btn-hero"
+                        >
+                            {user ? "Crea un drink" : "Crea l'account"}
                         </Link>
-                    </div>
-
-                    <div className="hero-foot">
-                        <span className="eyebrow">
-                            {user
-                                ? `Accesso come ${user.displayName || user.email}`
-                                : "Puoi sfogliare senza account. Per pubblicare invece serve registrarsi."}
-                        </span>
                     </div>
                 </div>
             </section>
 
-            <div className="shell">
-                <section className="tenets">
-                    <article className="tenet">
-                        <span className="eyebrow eyebrow-bitter">Esplora</span>
-                        <h2 className="tenet-title">Cerca la ricetta giusta</h2>
-                        <p className="tenet-body">
-                            Tutti i drink pubblici sono in un unico posto,
-                            con il nome di chi li ha scritti. Cerca per
-                            nome e apri la ricetta.
-                        </p>
-                    </article>
+            {user && (
+                <div className="shell home-section">
+                    <nav className="shortcuts" aria-label="Le tue funzioni">
+                        {SHORTCUTS.map(({ to, icon: Icon, title }) => (
+                            <Link to={to} className="shortcut" key={to}>
+                                <span className="shortcut-icon" aria-hidden="true">
+                                    <Icon />
+                                </span>
+                                <span className="shortcut-title">{title}</span>
+                            </Link>
+                        ))}
+                    </nav>
+                </div>
+            )}
 
-                    <article className="tenet">
-                        <span className="eyebrow eyebrow-bitter">Scrivi</span>
-                        <h2 className="tenet-title">Componi la ricetta</h2>
-                        <p className="tenet-body">
-                            Scegli alcolici, analcolici ed extra da liste
-                            già pronte, con le quantità in ml o a occhio,
-                            e scrivi tu la preparazione.
-                        </p>
-                    </article>
-
-                    <article className="tenet">
-                        <span className="eyebrow eyebrow-bitter">Porta con te</span>
-                        <h2 className="tenet-title">Funziona anche offline</h2>
-                        <p className="tenet-body">
-                            Installa LiverFailure sul telefono: i tuoi
-                            preferiti restano leggibili anche se la
-                            connessione salta a metà serata.
-                        </p>
-                    </article>
-                </section>
-            </div>
+            {user && (
+                <Suspense fallback={null}>
+                    <Recommendations />
+                </Suspense>
+            )}
         </>
     );
 }

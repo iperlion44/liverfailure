@@ -16,10 +16,18 @@ import {
 import { readCachedMyDrinks } from "../utils/myDrinksStorage";
 import { showNotification } from "../utils/notifications";
 
+import { fetchRating } from "../firebase/reviews";
+
 import { normalizeIngredients } from "../utils/drink";
 import { isAlcoholic, isExtra } from "../utils/spirits";
+import { averageOf, emptyRating, reviewCountLabel } from "../utils/rating";
 import { Loader } from "../components/Loader";
 import EmptyState from "../components/EmptyState";
+import PantryPanel from "../components/PantryPanel";
+import PartyPickerModal from "../components/PartyPickerModal";
+import ReviewSection from "../components/ReviewSection";
+import { StarRating } from "../components/StarRating";
+import { usePartyPicker } from "../utils/usePartyPicker";
 
 function FavMark({ draw = false }) {
     return (
@@ -54,7 +62,34 @@ function DrinkDetailsView({ id }) {
 
     const [isCached, setIsCached] = useState(false);
 
+    const [rating, setRating] = useState(emptyRating());
+
     const { user } = useAuth();
+
+    const party = usePartyPicker();
+
+    // l'aggregato sta in un documento a parte (drinkRatings), quindi è
+    // una lettura in più: la faccio da sola così se fallisce resta
+    // comunque la ricetta
+    useEffect(() => {
+        let cancelled = false;
+
+        if (!navigator.onLine) {
+            return undefined;
+        }
+
+        fetchRating(id)
+            .then((value) => {
+                if (!cancelled) {
+                    setRating(value);
+                }
+            })
+            .catch((error) => console.error(error));
+
+        return () => {
+            cancelled = true;
+        };
+    }, [id]);
 
     useEffect(() => {
         let cancelled = false;
@@ -194,12 +229,8 @@ function DrinkDetailsView({ id }) {
     if (!drink) {
         return (
             <div className="shell page">
-                <EmptyState
-                    eyebrow="Ricetta assente"
-                    title="Questo drink non esiste"
-                    body="Il link potrebbe essere vecchio, oppure chi lo ha scritto lo ha eliminato."
-                >
-                    <Link to="/explore" className="btn btn-primary">
+                <EmptyState title="Questo drink non esiste">
+                    <Link to="/explore" className="btn btn-primary btn-hero">
                         Torna a Esplora
                     </Link>
                 </EmptyState>
@@ -233,15 +264,20 @@ function DrinkDetailsView({ id }) {
                 <span className="detail-mark" />
                 <h1 className="display display-l detail-title">{drink.name}</h1>
                 <p className="detail-author">Creato da {drink.authorName || "Sconosciuto"}</p>
+
+                {rating.ratingCount > 0 && (
+                    <p className="detail-rating">
+                        <StarRating value={averageOf(rating)} showValue />
+                        <span className="detail-rating-count">
+                            {reviewCountLabel(rating.ratingCount)}
+                        </span>
+                    </p>
+                )}
+
                 {drink.description && <p className="detail-desc">{drink.description}</p>}
             </article>
 
-            {isCached && (
-                <div className="notice">
-                    Sei offline: stai leggendo la copia salvata sul
-                    dispositivo. Si aggiorna appena torni online.
-                </div>
-            )}
+            {isCached && <div className="notice">Sei offline: copia salvata sul dispositivo.</div>}
 
             <div className="recipe">
                 <section>
@@ -342,6 +378,13 @@ function DrinkDetailsView({ id }) {
                 </div>
             )}
 
+            {party.partyNotice && (
+                <div className="notice" role="status" style={{ marginTop: "2rem" }}>
+                    {party.partyNotice.text}{" "}
+                    <Link to={`/party/${party.partyNotice.code}`}>Vai alla festa</Link>.
+                </div>
+            )}
+
             <div className="detail-actions">
                 {user ? (
                     <button
@@ -349,7 +392,7 @@ function DrinkDetailsView({ id }) {
                         className={
                             isSaved
                                 ? `btn btn-outline btn-fav is-saved${justSaved ? " btn-fav-settle" : ""}`
-                                : "btn btn-outline btn-fav"
+                                : "btn btn-primary btn-fav"
                         }
                         onClick={isSaved ? handleRemoveFavorite : handleFavorite}
                         onAnimationEnd={(event) => {
@@ -359,20 +402,54 @@ function DrinkDetailsView({ id }) {
                         }}
                     >
                         {isSaved && <FavMark draw={justSaved} />}
-                        {isSaved ? "Rimuovi dai preferiti" : "Salva nei preferiti"}
+                        {isSaved ? "Salvato" : "Salva"}
                     </button>
                 ) : (
-                    <Link to="/login" className="btn btn-outline">
+                    <Link to="/login" className="btn btn-primary">
                         Accedi per salvarlo
                     </Link>
                 )}
 
+                {user && (
+                    <button
+                        type="button"
+                        className="btn btn-outline"
+                        onClick={() => party.setPickerDrink(drink)}
+                    >
+                        {party.openParties.some((openParty) => openParty.menuDrinkIds?.includes(drink.id))
+                            ? "Gestisci nelle feste"
+                            : "Aggiungi a una festa"}
+                    </button>
+                )}
+
                 {isOwner && (
-                    <Link to={`/edit-drink/${drink.id}`} className="btn btn-primary">
-                        Modifica la ricetta
+                    <Link to={`/edit-drink/${drink.id}`} className="btn btn-outline">
+                        Modifica
                     </Link>
                 )}
             </div>
+
+            <PantryPanel ingredients={ingredients} />
+
+            <ReviewSection
+                drinkId={drink.id}
+                isAuthor={Boolean(isOwner)}
+                rating={rating}
+                onRatingChange={setRating}
+            />
+
+            {party.pickerDrink && (
+                <PartyPickerModal
+                    drink={party.pickerDrink}
+                    parties={party.openParties}
+                    pendingPartyId={party.pendingPartyId}
+                    creating={party.creatingParty}
+                    error={party.partyListError}
+                    onToggleParty={party.handleToggleParty}
+                    onCreateParty={party.handleCreateParty}
+                    onClose={() => party.setPickerDrink(null)}
+                />
+            )}
         </div>
     );
 }

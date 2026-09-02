@@ -180,20 +180,14 @@ function CreateDrink() {
         <div className="shell-narrow page">
             <header className="page-head">
                 <div className="page-head-text">
-                    <span className="eyebrow">Nuova ricetta</span>
                     <h1 className="display display-l">Crea un drink</h1>
-                    <p className="lede">
-                        Scrivi la ricetta come la racconteresti a voce.
-                        Le dosi esatte sono facoltative.
-                    </p>
                 </div>
             </header>
 
             {savedName && (
                 <div className="notice" role="status">
                     <strong>{savedName}</strong> è salvato.{" "}
-                    <Link to="/my-drinks">Vedi i tuoi drink</Link> oppure
-                    continua a scriverne un altro qui sotto.
+                    <Link to="/my-drinks">Vedi i tuoi drink</Link>
                 </div>
             )}
 
@@ -241,10 +235,6 @@ function CreateDrink() {
                     <label className="field-label" htmlFor="drink-image">
                         Foto (facoltativa)
                     </label>
-                    <span className="field-hint">
-                        Se vuoi, aggiungi una foto del drink. Non è
-                        obbligatoria.
-                    </span>
 
                     {imageData ? (
                         <div className="image-picker">
@@ -270,10 +260,6 @@ function CreateDrink() {
 
                 <div className="field">
                     <label className="field-label">Ingredienti</label>
-                    <span className="field-hint">
-                        Aggiungi almeno un ingrediente, alcolico,
-                        analcolico o extra. La quantità è facoltativa.
-                    </span>
 
                     <div className="ingredient-section">
                         <span className="ingredient-section-title">Alcolici</span>
@@ -447,18 +433,15 @@ function CreateDrink() {
                     />
                     <span className="checkbox-text">
                         Pubblica in libreria
-                        <span className="checkbox-hint">
-                            Chiunque potrà leggerla in Esplora, con il tuo
-                            nome accanto. Puoi cambiare idea più tardi.
-                        </span>
+                        <span className="checkbox-hint">La vedranno tutti in Esplora</span>
                     </span>
                 </label>
 
                 <div className="form-actions">
-                    <button type="submit" className="btn btn-primary" disabled={saving}>
+                    <button type="submit" className="btn btn-success btn-hero" disabled={saving}>
                         {saving ? "Salvo..." : "Salva il drink"}
                     </button>
-                    <Link to="/my-drinks" className="btn btn-outline">
+                    <Link to="/my-drinks" className="btn btn-quiet">
                         Annulla
                     </Link>
                 </div>

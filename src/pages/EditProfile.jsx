@@ -297,10 +297,10 @@ function EditProfile() {
                 </div>
 
                 <div className="form-actions">
-                    <button type="submit" className="btn btn-primary" disabled={saving}>
+                    <button type="submit" className="btn btn-success btn-hero" disabled={saving}>
                         {saving ? "Salvo..." : "Salva modifiche"}
                     </button>
-                    <Link to="/profile" className="btn btn-outline">
+                    <Link to="/profile" className="btn btn-quiet">
                         Annulla
                     </Link>
                 </div>

@@ -28,10 +28,20 @@ export async function requestNotificationPermission() {
 // su android il costruttore Notification non funziona, va usato il
 // service worker. provo quella strada prima e tengo il costruttore
 // come fallback per desktop
+//
+// miglioramento dell'IA: in dev (o se il service worker non è mai
+// stato attivato sulla pagina) "navigator.serviceWorker.ready" non si
+// risolve mai, quindi senza timeout la notifica resta bloccata per
+// sempre invece di cadere sul fallback
 async function display(title, body) {
     if ("serviceWorker" in navigator) {
         try {
-            const registration = await navigator.serviceWorker.ready;
+            const registration = await Promise.race([
+                navigator.serviceWorker.ready,
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("Service worker non pronto in tempo")), 2000)
+                )
+            ]);
 
             await registration.showNotification(title, { body });
             return;

@@ -6,14 +6,23 @@ import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/fire
 import db from "../firebase/firestore";
 
 import { useAuth } from "../context/useAuth";
+import { useInventory } from "../context/useInventory";
+import { matchDrink } from "../utils/inventoryMatch";
 import DrinkCard from "../components/DrinkCard";
 import EmptyState from "../components/EmptyState";
+import PartyPickerModal from "../components/PartyPickerModal";
 import { DrinkGridSkeleton } from "../components/Loader";
+import { IconPlus } from "../components/NavIcons";
 import { removeFavoriteLocally } from "../utils/favoritesStorage";
 import { readCachedMyDrinks, writeCachedMyDrinks } from "../utils/myDrinksStorage";
+import { useFavoriteToggle } from "../utils/useFavoriteToggle";
+import { usePartyPicker } from "../utils/usePartyPicker";
 
 function MyDrinks() {
     const { user } = useAuth();
+    const { inventorySet } = useInventory();
+    const party = usePartyPicker();
+    const { favoriteActionFor } = useFavoriteToggle(user);
 
     const [drinks, setDrinks] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -117,12 +126,7 @@ function MyDrinks() {
         <div className="shell page">
             <header className="page-head">
                 <div className="page-head-text">
-                    <span className="eyebrow">La tua produzione</span>
                     <h1 className="display display-l">I miei drink</h1>
-                    <p className="lede">
-                        Le ricette che hai scritto tu. Solo quelle
-                        pubbliche compaiono in Esplora.
-                    </p>
                 </div>
 
                 {!loading && drinks.length > 0 && (
@@ -145,19 +149,22 @@ function MyDrinks() {
                 </div>
             )}
 
+            {party.partyNotice && (
+                <div className="notice" role="status">
+                    {party.partyNotice.text} <Link to={`/party/${party.partyNotice.code}`}>Vai alla festa</Link>.
+                </div>
+            )}
+
             {loading && <DrinkGridSkeleton count={3} />}
 
             {!loading && drinks.length === 0 && (
-                <EmptyState
-                    eyebrow="Nessuna ricetta"
-                    title="Non hai ancora scritto niente"
-                    body="Il primo drink si scrive in un minuto: nome, ingredienti, procedimento. Le dosi le decidi tu."
-                >
-                    <Link to="/create-drink" className="btn btn-primary">
+                <EmptyState title="Non hai ancora scritto niente">
+                    <Link to="/create-drink" className="btn btn-primary btn-hero">
+                        <IconPlus />
                         Crea il tuo primo drink
                     </Link>
                     <Link to="/explore" className="btn btn-outline">
-                        Guarda cosa fanno gli altri
+                        Guarda gli altri
                     </Link>
                 </EmptyState>
             )}
@@ -165,7 +172,14 @@ function MyDrinks() {
             {!loading && drinks.length > 0 && (
                 <div className="drink-grid">
                     {drinks.map((drink) => (
-                        <DrinkCard drink={drink} showStatus key={drink.id}>
+                        <DrinkCard
+                            drink={drink}
+                            showStatus
+                            match={matchDrink(drink.ingredients, inventorySet)}
+                            partyAction={party.partyActionFor(drink, user)}
+                            favoriteAction={favoriteActionFor(drink)}
+                            key={drink.id}
+                        >
                             <div className="drink-card-actions">
                                 <Link to={`/drink/${drink.id}`} className="btn btn-outline btn-sm">
                                     Apri
@@ -184,6 +198,19 @@ function MyDrinks() {
                         </DrinkCard>
                     ))}
                 </div>
+            )}
+
+            {party.pickerDrink && (
+                <PartyPickerModal
+                    drink={party.pickerDrink}
+                    parties={party.openParties}
+                    pendingPartyId={party.pendingPartyId}
+                    creating={party.creatingParty}
+                    error={party.partyListError}
+                    onToggleParty={party.handleToggleParty}
+                    onCreateParty={party.handleCreateParty}
+                    onClose={() => party.setPickerDrink(null)}
+                />
             )}
         </div>
     );

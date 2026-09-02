@@ -234,12 +234,8 @@ function EditDrink() {
     if (missing) {
         return (
             <div className="shell page">
-                <EmptyState
-                    eyebrow="Ricetta assente"
-                    title="Questo drink non esiste più"
-                    body="Il link potrebbe essere vecchio, oppure la ricetta è stata eliminata."
-                >
-                    <Link to="/my-drinks" className="btn btn-primary">
+                <EmptyState title="Questo drink non esiste più">
+                    <Link to="/my-drinks" className="btn btn-primary btn-hero">
                         Vai ai tuoi drink
                     </Link>
                 </EmptyState>
@@ -251,11 +247,10 @@ function EditDrink() {
         return (
             <div className="shell page">
                 <EmptyState
-                    eyebrow="Accesso negato"
                     title="Non puoi modificare questa ricetta"
-                    body="Solo chi l'ha scritta può modificarla."
+                    body="L'ha scritta qualcun altro."
                 >
-                    <Link to="/my-drinks" className="btn btn-primary">
+                    <Link to="/my-drinks" className="btn btn-primary btn-hero">
                         Vai ai tuoi drink
                     </Link>
                 </EmptyState>
@@ -547,10 +542,10 @@ function EditDrink() {
                 </label>
 
                 <div className="form-actions">
-                    <button type="submit" className="btn btn-primary" disabled={saving}>
+                    <button type="submit" className="btn btn-success btn-hero" disabled={saving}>
                         {saving ? "Salvo..." : "Salva le modifiche"}
                     </button>
-                    <Link to="/my-drinks" className="btn btn-outline">
+                    <Link to="/my-drinks" className="btn btn-quiet">
                         Annulla
                     </Link>
                 </div>
