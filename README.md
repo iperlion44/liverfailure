@@ -90,7 +90,6 @@ Tutta l'interfaccia è in italiano; è una scelta di prodotto, non un dettaglio 
 ```bash
 npm install
 npm run dev
-npm test     # test delle utility pure, node --test
 npm run lint
 ```
 
