@@ -122,6 +122,8 @@ Nello sviluppo del progetto è stato usato un assistente AI (Claude Code) come s
 - Divisione in parti con scopi diversi del CSS
 - Scrittura del codice CSS e scelte stilistiche dell'applicazione
 
+Claude AI è stata utilizzata anche una volta per caricare il progetto su github. Non è stato possibile levarlo dai coautori
+
 Le scelte di prodotto, l'architettura generale e le decisioni finali restano comunque a cura dello sviluppatore.
 
 La scrittura del codice che riguarda lo stile dell webapp (CSS) è basata sulla scrittura della pagina home
