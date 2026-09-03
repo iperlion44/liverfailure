@@ -10,6 +10,7 @@ Progetto sviluppato per l'esame universitario.
 - [Cosa fa](#cosa-fa)
 - [Modello dati](#modello-dati)
 - [Sviluppo](#sviluppo)
+- [Per testare](#per-testare)
 - [Stack](#stack)
 - [Altra documentazione](#altra-documentazione)
 
@@ -102,6 +103,149 @@ firebase deploy --only firestore:rules,firestore:indexes
 ```
 
 Gli indici nuovi servono per le feste che ho aperto io (`partySessions` su `hostId` + `createdAt`) e per ritrovare le proprie recensioni quando si elimina il profilo (query di gruppo su `reviews.authorId`).
+
+## Per testare
+
+Per provare l'app non serve registrarsi: c'è un account già pronto, con drink,
+preferiti e dispensa dentro.
+
+| | |
+| --- | --- |
+| Email | `admin@email.com` |
+| Password | `admin123` |
+
+Si può usare sia in locale (`npm run dev`) sia direttamente online su
+<https://liverfailure-b0032.web.app/>. Quello che segue è un giro completo delle
+funzioni, in un ordine che ha senso: ogni passo lascia i dati pronti per il
+successivo.
+
+### 1. Login e libreria pubblica
+
+1. Da "Accedi" entrare con le credenziali qui sopra.
+2. Andare su **Esplora**: c'è la libreria dei drink pubblici.
+3. Scrivere qualcosa nella barra "Cerca per nome" (es. `negroni`, o anche solo
+   `neg`): la griglia si filtra mentre si scrive.
+4. Provare i tre ordinamenti — **Più recenti**, **Più votati**, **Già fattibili** —
+   e il pulsante **Filtri**, che apre i chip per gli alcolici (Gin, Rum, Vodka...)
+   e per **Analcolico**. I filtri si sommano tra loro; il numerino sul pulsante
+   dice quanti sono attivi.
+
+### 2. Creare, modificare ed eliminare una ricetta
+
+1. **I miei drink** → **Crea un drink**. Servono nome, ingredienti con le dosi e
+   procedimento; si sceglie se renderlo pubblico o tenerlo privato.
+2. Al salvataggio, se il browser lo consente, arriva una **notifica di sistema**
+   ("Nuovo drink"): è il punto della traccia sulle notifiche PWA. La prima volta
+   Chrome chiede il permesso — bisogna accettarlo, altrimenti non si vede nulla.
+3. Se è pubblico lo si ritrova in Esplora; se è privato lo vede solo l'autore.
+4. Dalla stessa pagina si può **modificare** e **eliminare** il drink appena
+   creato.
+
+### 3. Preferiti e "Consigliati per te"
+
+1. Aprire un paio di drink da Esplora e premere il cuore per metterli tra i
+   **Preferiti** (anche qui parte una notifica).
+2. La pagina **Preferiti** li elenca; togliendo il cuore spariscono.
+3. Tornare in **Home**: la sezione **Consigliati per te** propone drink pubblici
+   non ancora salvati, scelti in base agli ingredienti in comune con i preferiti.
+   Mettendo tra i preferiti drink molto diversi (per esempio due a base gin) e
+   ricaricando la home, i consigli cambiano di conseguenza.
+
+### 4. Recensioni
+
+1. Aprire un drink **di un altro utente** (l'autore non può recensire il proprio:
+   il form non compare).
+2. Dare un voto da 1 a 5 stelle e scrivere un commento.
+3. La media e il numero di voti si aggiornano subito, sia sul dettaglio sia sulla
+   card in Esplora — e con l'ordinamento **Più votati** il drink si sposta.
+4. Provare a recensire di nuovo lo stesso drink: non si crea una seconda
+   recensione, si **modifica** quella esistente (una a testa, per costruzione).
+   C'è anche **Elimina** per toglierla.
+
+### 5. Dispensa e algoritmo di matching
+
+1. Andare su **Dispensa** e spuntare qualche ingrediente che si ha "in casa"
+   (es. Gin, Vermouth rosso, Campari), poi **Salva la dispensa**.
+2. Tornare in **Esplora**: le card mostrano se il drink si può fare ora oppure
+   quanti ingredienti mancano. Nei **Filtri** compare anche
+   **"Solo quello che posso fare"**.
+3. Aprire un drink a cui manca un ingrediente: nella scheda si vede cosa manca e
+   il selettore **"Per quante persone?"**, che ricalcola le dosi della lista della
+   spesa moltiplicandole.
+4. Togliere un ingrediente dalla dispensa e salvare: lo stesso drink passa da
+   fattibile a "ti manca 1 ingrediente".
+
+### 6. Modalità Festa (la parte in tempo reale)
+
+Qui serve un **secondo utente**: il modo più rapido è aprire una finestra in
+**incognito** (o un secondo browser, o il telefono sulla stessa app online) e
+registrare lì un account qualsiasi. L'account admin fa da **bar**, l'altro da
+**cliente**.
+
+Con l'account bar:
+
+1. **Festa** → **Crea una festa**. Si può indicare quante persone si aspettano
+   (serve alla scheda "Spesa").
+2. Nella scheda **Prepara** si scelgono i drink del menù. Si può metterci anche
+   una **propria ricetta privata**: alla festa la vedono tutti, ma in Esplora
+   resta invisibile.
+3. Nella scheda **Bancone** si dichiara quanto c'è di ogni bottiglia (in ml) e
+   quali extra ci sono.
+4. La scheda **Spesa** (visibile solo a festa ferma) dice quanto comprare perché
+   ognuno possa ordinare almeno una volta ogni drink del menù, già scalato di
+   quello che è già sul bancone. Spuntando una riga si barra come una lista della
+   spesa vera e la quantità finisce sul bancone.
+5. **Avvia la festa**. In alto compare il **codice di sei caratteri** da
+   condividere.
+
+Con l'account cliente (l'altra finestra):
+
+6. **Festa** → **Entra con il codice**, incollare il codice.
+7. Nella scheda **Menù** si vedono solo i drink che il bancone può davvero
+   preparare con le scorte attuali. Ordinarne uno.
+
+Di nuovo sul bar, senza ricaricare niente:
+
+8. L'ordine compare **da solo** nella scheda **Coda** (il contatore sul tab si
+   aggiorna in tempo reale).
+9. Portarlo a "in preparazione" e poi a **pronto**: gli ingredienti vengono
+   scalati dal bancone condiviso dentro una transazione, e al cliente arriva la
+   notifica **"Il tuo drink è pronto"**.
+10. Se si finisce una bottiglia, i drink che la usano spariscono dal menù del
+    cliente da soli. È il modo più diretto per vedere il matching e il tempo reale
+    lavorare insieme.
+11. La scheda **Persone** elenca chi è entrato; da lì l'host può promuovere un
+    altro partecipante a **bar**.
+12. **Ferma la festa** la mette in pausa (torna la scheda Spesa), **Riapri la
+    festa** la fa ripartire, ed eliminarla cancella ordini, bancone e
+    partecipanti.
+
+### 7. PWA: installazione, offline e notifiche
+
+La PWA vera si prova sulla **build**, non su `npm run dev` (in sviluppo il service
+worker non è attivo). Quindi o si usa il sito già online, oppure:
+
+```bash
+npm run build
+npm run preview
+```
+
+1. **Installazione**: da Chrome/Edge, sulla barra degli indirizzi, compare
+   l'icona "Installa app". L'app si apre in una finestra propria.
+2. **Offline**: dopo aver visitato qualche pagina, aprire i DevTools
+   (F12) → scheda **Network** → spuntare **Offline**, e ricaricare. L'app continua
+   a caricarsi e Preferiti, I miei drink e Dispensa restano leggibili (sono
+   duplicati in `localStorage`), con l'avviso "Sei offline" nelle pagine
+   coinvolte.
+3. **Notifiche**: già viste ai punti 2, 3 e 6. Se non arrivano, controllare il
+   permesso delle notifiche per il sito (icona del lucchetto accanto all'URL).
+   Su iOS le notifiche non sono supportate, come previsto dalla traccia.
+
+### 8. Profilo
+
+Da **Profilo** → **Modifica** si cambiano foto e password. C'è anche
+l'eliminazione dell'account: **da non usare sull'account admin**, perché cancella
+utente, drink e recensioni per sempre.
 
 ## Stack
 
