@@ -1,0 +1,329 @@
+/* =========================================================
+   20. DISPENSA E CONFRONTO INGREDIENTI
+========================================================= */
+
+/* Cosa trovi qui:
+   Tutto quello che confronta una ricetta con quello che hai in casa,
+   in sei blocchi:
+
+   .match-badge   il bollino "puoi farlo / ti manca poco" sulle card
+                  (components/MatchBadge.jsx), col tooltip di cosa manca
+   .pantry-panel  il pannello nella pagina del drink (PantryPanel.jsx)
+   .checklist     l'elenco ingrediente per ingrediente, spuntato o no
+   .shopping      la lista della spesa (usata anche dalla festa)
+   .stepper       il contatore -  1  + per le quantita'
+   .pantry-*      la pagina Dispensa vera e propria (pages/Inventory.jsx)
+*/
+
+.match-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    align-self: flex-start;
+    max-width: 100%;
+    margin-top: 0.85rem;
+    padding: 0.28rem 0.6rem;
+    border: 1px solid var(--rule-2);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    box-sizing: border-box;
+}
+
+/* piccolo tooltip che elenca gli ingredienti mancanti al passaggio del
+   mouse (o al focus da tastiera) sul badge "N mancante/i" */
+.match-badge-tooltip {
+    position: absolute;
+    bottom: calc(100% + 0.4rem);
+    left: 0;
+    z-index: 20;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid var(--rule-2);
+    border-radius: var(--radius-sm);
+    background: var(--paper);
+    color: var(--ink-2);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    white-space: normal;
+    width: max-content;
+    max-width: 220px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+.match-badge:hover .match-badge-tooltip,
+.match-badge:focus .match-badge-tooltip,
+.match-badge:focus-within .match-badge-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.match-badge-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--rule-2);
+    flex-shrink: 0;
+}
+
+/* scritta troncata: la card ha colonne fisse e il testo lungo
+   sconfinerebbe sopra la foto */
+.match-badge-label {
+    overflow: hidden;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.match-badge-ready {
+    border-color: var(--bitter);
+    color: var(--bitter);
+}
+
+.match-badge-ready .match-badge-dot {
+    background: var(--bitter);
+}
+
+/* il pannello dentro la pagina del drink: il verdetto, e la lista di
+   cosa hai e cosa ti manca */
+.pantry-panel {
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--rule);
+}
+
+.pantry-verdict {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--ink-2);
+    margin-bottom: 1.25rem;
+}
+
+.pantry-verdict .match-badge {
+    margin-top: 0;
+}
+
+/* l'elenco degli ingredienti della ricetta: .is-owned = ce l'hai */
+.checklist {
+    list-style: none;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink-3);
+}
+
+.checklist-item.is-owned {
+    color: var(--ink);
+}
+
+.checklist-item .ingredient-qty {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+}
+
+.checklist-mark {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border: 1px solid var(--rule-2);
+    border-radius: 50%;
+    color: var(--ink-3);
+}
+
+.checklist-mark.is-owned {
+    border-color: var(--bitter);
+    background: var(--bitter);
+    color: #fff;
+}
+
+/* la lista della spesa: sta qui perche' e' fatta di ingredienti, ma
+   la usa anche la scheda Spesa della festa */
+.shopping {
+    margin-top: 1.75rem;
+    padding: 1.25rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    background: var(--paper-2);
+}
+
+.shopping-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.shopping-list {
+    list-style: none;
+}
+
+.shopping-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--rule);
+}
+
+.shopping-list li:last-child {
+    border-bottom: none;
+}
+
+.shopping-list label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+}
+
+.shopping-list input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--bitter);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* il contatore con le due frecce (quantita' e persone). La variante
+   .stepper-input, piu' sotto, si puo' anche scrivere a mano */
+.stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--rule-2);
+    border-radius: var(--radius-pill);
+    background: var(--paper);
+    padding: 0.15rem;
+}
+
+.stepper-btn {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 1.05rem;
+    line-height: 1;
+    color: var(--ink-2);
+    transition: background-color 0.18s var(--ease), color 0.18s var(--ease);
+}
+
+.stepper-btn:hover:not(:disabled) {
+    background: var(--paper-3);
+    color: var(--ink);
+}
+
+.stepper-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.stepper-value {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-width: 6.5rem;
+    text-align: center;
+}
+
+/* variante scrivibile dello stepper: le frecce restano per i ritocchi,
+   ma un numero grande (trenta invitati) si batte a mano */
+.stepper-input {
+    width: 3.5rem;
+    padding: 0.2rem 0.35rem;
+    border: none;
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink);
+    text-align: center;
+}
+
+.stepper-input:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+.stepper-unit {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    padding-right: 0.35rem;
+}
+
+/* Pagina dispensa */
+.pantry-group {
+    margin-bottom: 2.5rem;
+}
+
+.pantry-group-head {
+    margin-bottom: 0.9rem;
+}
+
+.pantry-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.pantry-option {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--rule-2);
+    border-radius: var(--radius-pill);
+    background: var(--paper);
+    font-size: 0.85rem;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: border-color 0.18s var(--ease),
+                background-color 0.18s var(--ease),
+                color 0.18s var(--ease);
+}
+
+.pantry-option:hover {
+    border-color: var(--ink-3);
+}
+
+.pantry-option.is-active {
+    background: var(--bitter);
+    border-color: var(--bitter);
+    color: #fff;
+}
+
+.pantry-option:has(:focus-visible) {
+    outline: 2px solid var(--bitter);
+    outline-offset: 2px;
+}
+
+.pantry-actions {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+}
+
+

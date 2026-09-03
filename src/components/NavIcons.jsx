@@ -1,3 +1,6 @@
+// Aggiunta da parte dell' AI di icone senza doverle scaricare così che siano
+//  piu facili da gestire e modificare, e non appesantiscano il bundle.
+
 // piccola libreria di icone a tratto, stesso stile delle icone già
 // disegnate a mano in DrinkCard/Explore (stroke sottile, currentColor):
 // usate nella navbar e nelle scorciatoie in home, così la stessa forma
@@ -77,11 +80,6 @@ function IconPlus() {
     );
 }
 
-// il glifo "✓" dei font non è mai centrato nel proprio riquadro (varia
-// da font a font), quindi per i pallini "ce l'hai già" usiamo un
-// tratto disegnato apposta: il path è costruito per avere il centro
-// esatto in (8,8), cosi' si allinea da solo dentro il cerchio con un
-// semplice grid place-items:center
 function IconCheck() {
     return (
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

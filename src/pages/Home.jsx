@@ -5,6 +5,7 @@ import { useAuth } from "../context/useAuth";
 import { useMediaQuery } from "../utils/useMediaQuery";
 import { IconBottle, IconGlass, IconParty, IconSearch, IconStar } from "../components/NavIcons";
 
+//consiglio dell'AI:
 // le colonne con le foto sono solo decorative ma leggono da firestore,
 // quindi le carico in lazy per non appesantire il bundle della home
 const DrinkMarquee = lazy(() => import("../components/DrinkMarquee"));
@@ -14,16 +15,12 @@ const DrinkMarquee = lazy(() => import("../components/DrinkMarquee"));
 // da fuori senza account
 const Recommendations = lazy(() => import("../components/Recommendations"));
 
-// stessa soglia di .marquee in global.css. sotto questa larghezza il
+//consiglio dell'AI:
+// stessa soglia di .marquee in styles/parts/10-home-colonne-drink.css.
+// sotto questa larghezza il
 // CSS le nasconde comunque quindi non ha senso nemmeno montarle
 const MARQUEE_BREAKPOINT = "(min-width: 1380px)";
 
-// le funzioni piu' recenti (dispensa e festa) non compaiono da nessuna
-// parte in home, solo nei link di testo della navbar: chi torna dopo
-// essersi registrato le ritrova qui, con la stessa icona della barra.
-// Nome e icona bastano: la riga di spiegazione sotto ognuna la
-// leggeva nessuno, e faceva quattro riquadri di testo invece di
-// quattro bersagli grossi da toccare
 const SHORTCUTS = [
     { to: "/inventory", icon: IconBottle, title: "Dispensa" },
     { to: "/party", icon: IconParty, title: "Festa" },

@@ -118,9 +118,9 @@ function CreateDrink() {
         const trimmedName = name.trim();
         const trimmedPreparation = preparation.trim();
 
+        //Aggiunta AI:
         // l'attributo required dell'html non blocca gli spazi vuoti, ma
-        // firestore sì, quindi meglio controllarlo qui invece di far
-        // uscire un errore di permessi a caso
+        // firestore sì, quindi meglio controllarlo qui
         if (!trimmedName) {
             setError("Dai un nome al drink.");
             return;

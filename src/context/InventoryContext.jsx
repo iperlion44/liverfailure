@@ -18,9 +18,7 @@ export function InventoryProvider({ children }) {
     const [state, setState] = useState(EMPTY);
 
     // se cambio account mentre un salvataggio è ancora in volo, la
-    // risposta in ritardo non deve marchiare lo stato con l'uid vecchio:
-    // resterebbe "non è roba tua" per sempre e la dispensa non si
-    // caricherebbe più finché non ricarico la pagina
+    // risposta in ritardo non deve marchiare lo stato con l'uid vecchio
     const currentUid = useRef(null);
 
     useEffect(() => {

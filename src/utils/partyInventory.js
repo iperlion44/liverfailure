@@ -1,8 +1,7 @@
 import { extractMlValue, normalizeIngredients } from "./drink.js";
 import { isAlcoholic, isExtra } from "./spirits.js";
 
-// alcolici e analcolici li conto in ml, gli extra no: nessuno pesa il
-// ghiaccio o le foglie di menta a metà serata
+// alcolici e analcolici li conto in ml, gli extra no
 export const DEFAULT_BOTTLE_ML = 700;
 export const DEFAULT_MIXER_ML = 1000;
 
@@ -16,7 +15,7 @@ export function defaultAmountFor(name) {
 
 // un ingrediente a 0 ml o meno è come se non fosse più sul bancone: lo
 // tolgo qui così torna da solo tra i mancanti ovunque venga letto
-// l'inventario, senza dover premere "Togli" a mano
+// l'inventario
 export function normalizePartyInventory(raw) {
     const amounts = {};
     const source = raw && typeof raw.amounts === "object" && raw.amounts ? raw.amounts : {};
@@ -40,8 +39,7 @@ export function normalizePartyInventory(raw) {
     return { amounts, extras, removedDrinks };
 }
 
-// il bar può togliere un drink dal bancone anche se gli ingredienti ci
-// sono: non è una questione di scorte, è una scelta di servizio
+// il bar può togliere un drink dal bancone anche se gli ingredienti cisono
 export function isRemovedFromBar(inventory, drinkId) {
     return normalizePartyInventory(inventory).removedDrinks.includes(drinkId);
 }
@@ -66,8 +64,7 @@ export function availableIngredients(inventory) {
     return available;
 }
 
-// se la ricetta cita due volte lo stesso ingrediente devo scalare la
-// somma, non l'ultima riga che ho letto
+// se la ricetta cita due volte lo stesso ingrediente devo scalare la somma
 export function aggregateRequirements(rawIngredients) {
     const requirements = new Map();
 
@@ -218,10 +215,6 @@ export function addPantryToPartyInventory(pantry = [], previous = null) {
 }
 
 // il bar corregge il bancone mentre gli ordini continuano a scalarlo.
-// Se salvassi la mia copia così com'è, rimetterei a posto i millilitri
-// che qualcuno ha già versato: applico solo quello che ho cambiato io
-// rispetto a quando ho iniziato a modificare, e il resto lo lascio come
-// sta adesso sul server.
 export function mergePartyInventory(base, edited, server) {
     const from = normalizePartyInventory(base);
     const mine = normalizePartyInventory(edited);

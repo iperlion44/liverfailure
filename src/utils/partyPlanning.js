@@ -3,9 +3,6 @@ import { toInventorySet } from "./inventoryMatch.js";
 import { availableIngredients } from "./partyInventory.js";
 import { buildShoppingList } from "./quantityScale.js";
 
-// qui basta sapere se l'ingrediente c'è o no, come nel resto dell'app:
-// niente confronto sui millilitri, quello lo fa già il bancone quando
-// la festa è avviata
 export function menuIngredients(drinks = []) {
     return drinks.flatMap((drink) => normalizeIngredients(drink.ingredients));
 }
@@ -22,9 +19,6 @@ export function combinedPantry(pantry, partyInventory) {
     return combined;
 }
 
-// sommo le quantità dei drink scelti (buildShoppingList unisce già le
-// righe con lo stesso nome) e poi divido tra quello che c'è in dispensa
-// e quello che manca ancora
 export function buildMenuShoppingList(drinks, inventory) {
     const owned = toInventorySet(inventory);
     const combined = buildShoppingList(menuIngredients(drinks));

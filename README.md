@@ -116,11 +116,16 @@ Gli indici nuovi servono per le feste che ho aperto io (`partySessions` su `host
 Nello sviluppo del progetto è stato usato un assistente AI (Claude Code) come supporto per:
 
 - Revisione di codice (componenti React, pagine, logica applicativa e utility)
-- Configurazione di strumenti e servizi (Firebase, PWA, build/deploy)
+- Aiuto nella configurazione di strumenti e servizi (Firebase, PWA, build/deploy)
 - Debug e correzione di problemi riscontrati durante lo sviluppo
 - Stesura e revisione della documentazione (questo README incluso)
-
-La scrittura del codice che riguarda lo stile dell webapp (CSS) è basata sulla scrittura della pagina home
-creata dall'utente e poi lo stesso stile è stato riutilizzato come base dall'assistente AI per le altre pagine
+- Commenti del codice
+- Divisione in parti con scopi diversi del CSS
+- Scrittura del codice CSS e scelte stilistiche dell'applicazione
 
 Le scelte di prodotto, l'architettura generale e le decisioni finali restano comunque a cura dello sviluppatore.
+
+La scrittura del codice che riguarda lo stile dell webapp (CSS) è basata sulla scrittura della pagina home
+creata dallo sviluppatore e poi lo stesso stile è stato riutilizzato come base dall'assistente AI per le altre pagine
+
+Per imparare ad utilizzare ed interagire con Firebase è stata invece utilizzata l'AI Gemini

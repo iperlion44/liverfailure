@@ -1,0 +1,213 @@
+/* =========================================================
+   17. VOTI E RECENSIONI
+========================================================= */
+
+/* Cosa trovi qui:
+   Stelle e commenti (StarRating.jsx e ReviewSection.jsx). Tre cose
+   diverse, in quest'ordine:
+
+   1) il voto che si legge (anche sulle card): .rating .stars
+   2) il voto che si da', cliccabile: .stars-input .star-choice
+   3) i commenti sotto la ricetta: .reviews .review-form .review
+*/
+
+.rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* due file di stelle sovrapposte: quella piena viene tagliata in
+   percentuale, così 4,3 si vede che è 4,3 e non 4 */
+.stars {
+    position: relative;
+    display: inline-flex;
+    line-height: 0;
+    color: var(--rule-2);
+}
+
+.stars-empty,
+.stars-full {
+    display: inline-flex;
+    gap: 1px;
+}
+
+/* senza questo i flex item si schiacciano per stare nella percentuale
+   di larghezza invece di restare della loro dimensione e farsi tagliare
+   da overflow:hidden, e le stelle piene escono deformi dalla riga */
+.stars-empty svg,
+.stars-full svg {
+    flex-shrink: 0;
+}
+
+.stars-full {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    color: var(--bitter);
+}
+
+.rating-value {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-2);
+}
+
+.rating-count {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    color: var(--ink-3);
+}
+
+/* da qui in giu si passa alle stelle CLICCABILI: quelle sopra
+   servono solo a mostrare il voto medio
+*/
+.stars-input {
+    display: inline-flex;
+    gap: 0.3rem;
+}
+
+.star-choice {
+    display: inline-flex;
+    padding: 0.3rem;
+    color: var(--rule-2);
+    cursor: pointer;
+    transition: color 0.18s var(--ease), transform 0.18s var(--ease);
+}
+
+.star-choice.is-active {
+    color: var(--bitter);
+}
+
+.star-choice:hover {
+    transform: translateY(-1px);
+}
+
+.star-choice:has(:focus-visible) {
+    outline: 2px solid var(--bitter);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+/* il voto in grande nella pagina del drink */
+.detail-rating {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+}
+
+.detail-rating-count {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+/* da qui in giu i commenti scritti: riepilogo, form, elenco */
+.reviews {
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--rule);
+}
+
+.reviews-summary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.15rem 1.25rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    background: var(--paper-2);
+    margin-bottom: 1.5rem;
+}
+
+.reviews-average {
+    font-family: var(--font-display);
+    font-size: 2.25rem;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.reviews-count {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 0.35rem;
+}
+
+.review-form {
+    margin-bottom: 2rem;
+}
+
+.review-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+/* un singolo commento. .review-mine e' il tuo, con la cornice marcata */
+.review {
+    background: var(--paper);
+    padding: 1.15rem 1.25rem;
+}
+
+.review-mine {
+    border: 1px solid var(--rule);
+    border-left: 2px solid var(--bitter);
+    border-radius: var(--radius-sm);
+    background: var(--paper-2);
+}
+
+.review-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.review-author {
+    font-weight: 500;
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+}
+
+.review-date {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+.review-comment {
+    margin-top: 0.6rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--ink-2);
+    text-wrap: pretty;
+    overflow-wrap: break-word;
+}
+
+.review-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+

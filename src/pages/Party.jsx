@@ -39,9 +39,8 @@ function Party() {
     const [deletingCode, setDeletingCode] = useState("");
     const [deleteError, setDeleteError] = useState("");
 
-    // le feste a cui ho partecipato stanno in localStorage: è una
-    // lettura sincrona, non ha senso passare da un effetto. Quando una
-    // festa viene eliminata la tolgo anche qui, senza dover rileggere
+    // le feste a cui ho partecipato stanno in localStorage.
+    // Quando una festa viene eliminata la tolgo anche qui, senza dover rileggere
     // tutto lo storage
     const [forgottenCodes, setForgottenCodes] = useState(() => new Set());
     const remembered = useMemo(
@@ -59,6 +58,7 @@ function Party() {
             .catch((error) => console.error(error));
     }, [user]);
 
+    //consiglio dell AI:
     // le feste ricordate qui non sono mai state verificate: se l'host
     // ne ha cancellata una, io (che ero solo cliente) non lo saprei mai
     // finché non provo ad aprirla. Le controllo una volta all'ingresso
@@ -182,7 +182,7 @@ function Party() {
     };
 
     // le feste a cui ho partecipato me le ricordo sul dispositivo, quelle
-    // che ho aperto io le ritrovo con una query: le unisco senza doppioni
+    // che ho aperto io le ritrovo con una query
     const openParties = [
         ...hosted.map((party) => ({
             code: party.id,
@@ -315,9 +315,6 @@ function Party() {
                             </span>
                         </div>
 
-                        {/* finché la dispensa non è arrivata risulterebbe vuota
-                            anche a chi ce l'ha piena, e la festa partirebbe con
-                            il bancone spoglio: meglio aspettare un attimo */}
                         <label className="checkbox-row">
                             <input
                                 type="checkbox"

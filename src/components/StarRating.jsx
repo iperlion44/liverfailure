@@ -15,8 +15,7 @@ function starRow() {
     return Array.from({ length: RATING_MAX }, (_, index) => <StarShape key={index} />);
 }
 
-// invece di arrotondare a stella intera disegno due file sovrapposte e
-// taglio quella piena in percentuale: 4,3 si vede che è 4,3
+
 export function StarRating({ value = 0, showValue = false, count = null }) {
     const safeValue = Math.min(RATING_MAX, Math.max(0, Number(value) || 0));
     const percent = (safeValue / RATING_MAX) * 100;

@@ -1,0 +1,120 @@
+/* =========================================================
+   15. PROFILO
+========================================================= */
+
+/* Cosa trovi qui:
+   Il profilo (pages/Profile.jsx) e il menu dell'avatar (UserMenu.jsx):
+
+   .profile-card  il riquadro con avatar, nome ed email
+   .avatar        il cerchio con la foto o l'iniziale
+   .avatar-sm     la versione piccola, nella barra in alto
+   .stat-row      i tre numeri (drink scritti, in libreria, preferiti)
+   .danger-zone   in fondo: le azioni da cui non si torna indietro
+*/
+
+.profile-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.75rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper-2);
+    margin-bottom: 1.5rem;
+}
+
+/* il cerchio: se non c'e' la foto mostra l'iniziale del nome */
+.avatar {
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1;
+    overflow: hidden;
+}
+
+/* senza min-width: 0 un nome o email lunghi spingevano fuori dal
+   bordo della card invece di andare a capo (soprattutto su telefono) */
+.profile-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.avatar-sm {
+    width: 34px;
+    height: 34px;
+    font-size: 0.95rem;
+    transition: transform 0.18s var(--ease);
+}
+
+.avatar-photo {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+@media (hover: hover) {
+    .avatar-sm:hover {
+        transform: scale(1.07);
+    }
+}
+
+.profile-name {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.profile-email {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    color: var(--ink-2);
+    word-break: break-all;
+}
+
+.danger-zone {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+}
+
+.danger-zone .eyebrow {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+/* la fila di numeri sotto i dati */
+.stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.stat {
+    background: var(--paper);
+    padding: 1.25rem clamp(0.75rem, 4vw, 1.4rem);
+}
+
+.stat-value {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 6vw, 2rem);
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 0.45rem;
+}
+
+

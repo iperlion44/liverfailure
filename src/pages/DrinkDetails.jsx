@@ -57,7 +57,7 @@ function DrinkDetailsView({ id }) {
     const [notice, setNotice] = useState("");
 
     // per far vedere l'animazione del segno di spunta solo quando clicco
-    // davvero, non quando la pagina si carica con un drink già salvato
+    // non quando la pagina si carica con un drink già salvato
     const [justSaved, setJustSaved] = useState(false);
 
     const [isCached, setIsCached] = useState(false);
@@ -68,9 +68,6 @@ function DrinkDetailsView({ id }) {
 
     const party = usePartyPicker();
 
-    // l'aggregato sta in un documento a parte (drinkRatings), quindi è
-    // una lettura in più: la faccio da sola così se fallisce resta
-    // comunque la ricetta
     useEffect(() => {
         let cancelled = false;
 
@@ -112,10 +109,7 @@ function DrinkDetailsView({ id }) {
                 }
 
                 // chi può leggere il drink lo decidono le regole di
-                // firestore: pubblico per tutti, privato per l'autore e
-                // per chi è in una festa che ce l'ha nel menù. Se la
-                // lettura è arrivata fin qui la ricetta si può mostrare;
-                // sennò getDoc ha già sollevato e siamo nel catch
+                // firestore
                 if (snapshot.exists()) {
                     setDrink({ id: snapshot.id, ...snapshot.data() });
                     setIsCached(false);
@@ -461,6 +455,7 @@ function DrinkDetailsView({ id }) {
     );
 }
 
+//correzione AI:
 // con key={id} il componente si rimonta da zero quando cambio ricetta,
 // sennò restava a video quella vecchia finché non arrivava la nuova
 function DrinkDetails() {

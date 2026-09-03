@@ -1,0 +1,68 @@
+/* =========================================================
+   2. PRIMITIVE TIPOGRAFICHE
+========================================================= */
+
+/* Cosa trovi qui:
+   I mattoncini di testo e di larghezza riusati ovunque:
+   .shell / .shell-narrow  la colonna centrale della pagina
+   .eyebrow                l'etichettina mono sopra i titoli
+   .display, .display-xl   i titoloni in Bodoni
+   .lede                   il paragrafo di apertura, grigio e piu grande
+*/
+
+/* la larghezza standard del contenuto (--shell), centrata */
+.shell {
+    width: 100%;
+    max-width: var(--shell);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+}
+
+/* versione stretta: pagine da leggere e form */
+.shell-narrow {
+    width: 100%;
+    max-width: 760px;
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+}
+
+/* Etichetta piccola sopra i titoli, mono maiuscolo spaziato */
+.eyebrow {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+.eyebrow-bitter {
+    color: var(--bitter);
+}
+
+.display {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    letter-spacing: -0.015em;
+    line-height: 1.02;
+    text-wrap: balance;
+}
+
+.display-xl {
+    font-size: clamp(2.5rem, 6.5vw, 4.5rem);
+}
+
+.display-l {
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+}
+
+.lede {
+    font-size: clamp(1.02rem, 1.5vw, 1.18rem);
+    line-height: 1.6;
+    color: var(--ink-2);
+    max-width: 52ch;
+    text-wrap: pretty;
+}
+

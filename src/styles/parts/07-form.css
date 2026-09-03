@@ -1,0 +1,234 @@
+/* =========================================================
+   7. FORM
+========================================================= */
+
+/* Cosa trovi qui:
+   Tutto quello che si compila: Accedi, Registrati, Crea drink, Modifica
+   profilo, Dispensa. In ordine:
+
+   .field             etichetta + campo, l'unita' base di ogni form
+   .input / .textarea i campi di testo
+   .checkbox-row      casella con testo a fianco
+   .form-error        il messaggio rosso di errore
+   .form-actions      la riga dei pulsanti in fondo
+   .visually-hidden   testo solo per lo screen reader
+   .image-picker      scelta della foto (drink, avatar)
+   .ingredient-row    una riga ingrediente: nome + dose
+*/
+
+/* il blocco etichetta + campo: e' l'unita' base di ogni form */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin-bottom: 1.25rem;
+}
+
+.field-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+}
+
+.field-hint {
+    font-size: 0.82rem;
+    color: var(--ink-3);
+}
+
+/* i campi di testo. Lo stato :focus e' piu sotto */
+.input,
+.textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: var(--paper);
+    border: 1px solid var(--rule-2);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.18s var(--ease),
+                background-color 0.18s var(--ease);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+    color: var(--ink-3);
+}
+
+.input:hover,
+.textarea:hover {
+    border-color: var(--ink-3);
+}
+
+.input:focus,
+.textarea:focus {
+    outline: none;
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.06);
+}
+
+.textarea {
+    min-height: 140px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.15rem;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+}
+
+.checkbox-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 0.15rem;
+    accent-color: var(--bitter);
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.checkbox-text {
+    font-size: 0.92rem;
+    font-weight: 500;
+}
+
+.checkbox-hint {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 400;
+    color: var(--ink-2);
+    margin-top: 0.15rem;
+}
+
+.form-error {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid rgba(163, 42, 34, 0.25);
+    border-left: 2px solid var(--danger);
+    border-radius: var(--radius-sm);
+    background: var(--danger-tint);
+    color: var(--bitter-dark);
+    font-size: 0.9rem;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+/* non si vede, ma lo screen reader la legge: per le etichette che
+   sullo schermo si capiscono gia' dal contesto */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* il riquadro per scegliere la foto: anteprima + pulsanti */
+.image-picker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+}
+
+.image-picker-preview {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--rule-2);
+    flex-shrink: 0;
+}
+
+.image-picker-preview-round {
+    border-radius: 50%;
+}
+
+.image-picker-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* una riga della ricetta in Crea/Modifica drink: nome, quantita',
+   unita' e cestino */
+.ingredient-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+}
+
+.ingredient-row .input {
+    width: auto;
+}
+
+.ingredient-row-name {
+    flex: 2 1 12rem;
+}
+
+.ingredient-row-qty {
+    flex: 1 1 8rem;
+}
+
+.ingredient-row-qty-group {
+    display: flex;
+    align-items: center;
+    flex: 1 1 8rem;
+    gap: 0.4rem;
+}
+
+.ingredient-row-qty-group .ingredient-row-qty {
+    flex: 1 1 auto;
+    width: auto;
+}
+
+.ingredient-row-qty-unit {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-3);
+    flex-shrink: 0;
+}
+
+.ingredient-row-remove {
+    flex-shrink: 0;
+}
+
+/* i gruppi di ingredienti (alcolici, analcolici, extra) nella dispensa */
+.ingredient-section {
+    margin-top: 1.1rem;
+}
+
+.ingredient-section + .ingredient-section {
+    padding-top: 1.1rem;
+    border-top: 1px dashed var(--rule);
+}
+
+.ingredient-section-title {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 0.5rem;
+}
+
+

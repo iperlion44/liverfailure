@@ -1,0 +1,26 @@
+/* =========================================================
+   26. MOVIMENTO RIDOTTO
+========================================================= */
+
+/* Cosa trovi qui:
+   Se nel sistema e' attivo "riduci le animazioni", qui si spegne tutto:
+   animazioni, transizioni e lo scorrimento morbido. Ultimo file di
+   proposito, cosi' vince su qualsiasi animazione scritta prima.
+*/
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .drink-card:hover,
+    a:hover > .drink-card {
+        transform: none;
+    }
+}

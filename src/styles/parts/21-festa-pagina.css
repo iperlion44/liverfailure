@@ -1,0 +1,241 @@
+/* =========================================================
+   21. FESTA — PAGINA FESTE (elenco, biglietti, crea/entra)
+========================================================= */
+
+/* Cosa trovi qui:
+   La pagina Festa (pages/Party.jsx): crei una festa, entri con un
+   codice, o rientri in una gia' aperta.
+
+   .page-festa       attenzione: ridefinisce i colori delle superfici,
+                     ma solo per questa schermata (sfondo piu scuro)
+   .party-hub        la sezione con le tue feste
+   .party-ticket     una festa, disegnata come un biglietto con lo strappo
+   .party-card       le cornici sotto: crea festa / entra col codice
+   .party-code-box   il codice da far leggere agli invitati
+
+   La stanza della festa sta in 22-festa-sala.css.
+*/
+
+/* Solo su questa schermata le superfici sono un filo piu' scure:
+   non tocco i token globali, li ridefinisco solo qui dentro */
+.page-festa {
+    --paper: #F5F4F1;
+    --paper-2: #EDEBE6;
+    --paper-3: #E6E3DC;
+    --rule: #D4D1CA;
+    --rule-2: #BFBBB3;
+}
+
+.party-card {
+    padding: 1.6rem 1.5rem 1.75rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper);
+    margin-bottom: 1.5rem;
+}
+
+.party-card .recipe-block-title {
+    margin-top: 0.6rem;
+}
+
+/* L'elenco delle tue feste: e' il motivo per cui si apre la pagina,
+   quindi sezione a tutta larghezza e non una cornice come i form sotto */
+.party-hub {
+    margin-bottom: clamp(2.5rem, 6vw, 3.5rem);
+}
+
+/* la griglia dei biglietti */
+.party-grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+/* Ogni festa e' un biglietto: sopra lo strappo si entra con un tocco,
+   sotto (solo per chi fa il bar) c'e' "Elimina", staccata apposta */
+.party-ticket {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper);
+    overflow: hidden;
+    transition: border-color 0.2s var(--ease),
+                box-shadow 0.2s var(--ease),
+                transform 0.2s var(--ease);
+}
+
+@media (hover: hover) {
+    .party-ticket:hover {
+        border-color: var(--rule-2);
+        box-shadow: var(--lift);
+        transform: translateY(-2px);
+    }
+
+    .party-ticket:hover .party-ticket-arrow {
+        color: var(--bitter);
+        transform: translate(2px, -2px);
+    }
+}
+
+.party-ticket-link {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.4rem 2.5rem 1.25rem 1.5rem;
+    color: inherit;
+}
+
+.party-ticket-code {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+.party-ticket-name {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+}
+
+.party-ticket-meta {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+.party-ticket-arrow {
+    position: absolute;
+    top: 1.45rem;
+    right: 1.5rem;
+    font-family: var(--font-mono);
+    color: var(--ink-3);
+    transition: transform 0.18s var(--ease), color 0.18s var(--ease);
+}
+
+/* la linea di strappo con le due tacche: il taglio si vede perche'
+   overflow:hidden sul biglietto rifila esattamente a meta' i cerchi */
+.party-ticket-foot {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.85rem 1.5rem;
+    border-top: 1px dashed var(--rule-2);
+}
+
+.party-ticket-foot::before,
+.party-ticket-foot::after {
+    content: "";
+    position: absolute;
+    top: -9px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+}
+
+.party-ticket-foot::before {
+    left: -9px;
+}
+
+.party-ticket-foot::after {
+    right: -9px;
+}
+
+/* "Crea" ed "Entra": tenuti piu' discreti dell'elenco qui sopra, e da
+   tablet in su affiancati */
+.party-secondary {
+    display: grid;
+    gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+    .party-secondary {
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+    }
+}
+
+.party-card-quiet {
+    padding: 1.35rem 1.4rem 1.5rem;
+}
+
+.party-card-quiet .recipe-block-title {
+    font-size: 1.15rem;
+}
+
+.input-code {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+}
+
+/* l'elenco a righe (usato per le feste passate e nelle liste semplici) */
+.party-list {
+    list-style: none;
+}
+
+.party-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--rule);
+}
+
+.party-row:last-child {
+    border-bottom: none;
+}
+
+.party-row-name {
+    display: block;
+    font-weight: 500;
+}
+
+.party-row-code {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+.party-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.party-code-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--rule-2);
+    border-radius: var(--radius-sm);
+    background: var(--paper-2);
+}
+
+.party-code {
+    font-family: var(--font-mono);
+    font-size: 1.35rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    line-height: 1;
+}

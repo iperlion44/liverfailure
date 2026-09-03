@@ -41,9 +41,6 @@ export async function fetchRating(drinkId) {
     return toRating(await getDoc(ratingRef(drinkId)));
 }
 
-// una sola lettura per tutta la libreria: gli aggregati sono documenti
-// da due numeri, tenerli separati dal drink costa poco e mi permette
-// di ordinare Esplora per media senza aprire ogni ricetta
 export async function fetchAllRatings() {
     const snapshot = await getDocs(collection(db, RATINGS_COLLECTION));
     const ratings = {};
@@ -64,8 +61,8 @@ export async function fetchReviews(drinkId) {
 }
 
 // recensione e aggregato vanno scritti insieme: se passasse solo una
-// delle due la media resterebbe sbagliata per sempre, e le regole
-// firestore controllano proprio che le due scritture arrivino appaiate
+// delle due la media sarebbe sbagliata, le regole
+// firestore controllano che le due scritture arrivino appaiate
 export async function saveReview({ drinkId, user, rating, comment = "" }) {
     if (!drinkId || !user) {
         throw new Error("Recensione senza drink o senza autore.");
@@ -77,9 +74,7 @@ export async function saveReview({ drinkId, user, rating, comment = "" }) {
 
     const trimmedComment = String(comment ?? "").trim().slice(0, REVIEW_MAX_LENGTH);
 
-    // le regole rifiutano i nomi oltre gli 80 caratteri: taglio qui,
-    // sennò chi ha un displayName lunghissimo non riesce più a
-    // recensire e si becca un errore che parla di connessione
+    // le regole rifiutano i nomi oltre gli 80 caratteri
     const authorName = String(user.displayName || "Utente").slice(0, 80);
 
     await runTransaction(db, async (transaction) => {
@@ -143,6 +138,7 @@ export async function deleteReview({ drinkId, uid }) {
     });
 }
 
+//Aggiunta AI:
 // serve per l'eliminazione del profilo: le recensioni stanno sparse
 // nelle sottocollezioni di tutti i drink, l'unico modo per ritrovare
 // le mie è una query di gruppo su authorId

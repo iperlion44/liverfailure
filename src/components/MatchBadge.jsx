@@ -1,7 +1,6 @@
 import { MATCH_READY, matchLabel } from "../utils/inventoryMatch";
 
-// non mostro niente quando mancano troppe cose: un badge su ogni card
-// diventerebbe rumore invece che informazione
+// non mostro niente quando mancano troppe cose
 function MatchBadge({ match }) {
     const label = matchLabel(match);
 

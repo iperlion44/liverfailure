@@ -1,0 +1,89 @@
+/* =========================================================
+   11. RICERCA
+========================================================= */
+
+/* Cosa trovi qui:
+   Il campo di ricerca normale (non quello grande della home) e la fila
+   di chip per filtrare per alcolico. Si vedono in Esplora e in I miei drink:
+   .search / .search-input / .search-icon   la barra di ricerca
+   .spirit-filters / .spirit-chip           le pastiglie Gin, Rum, Vodka...
+*/
+
+.search {
+    position: relative;
+    max-width: 520px;
+    margin-bottom: 2.25rem;
+}
+
+/* stesso gruppo funzionale dei filtri: li ravvicina quando ci sono */
+.search:has(+ .spirit-filters),
+.search:has(+ .explore-tools) {
+    margin-bottom: 1.1rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.9rem 1.1rem 0.9rem 2.85rem;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-pill);
+    transition: border-color 0.18s var(--ease),
+                background-color 0.18s var(--ease);
+}
+
+.search-input::placeholder {
+    color: var(--ink-3);
+}
+
+.search-input:focus {
+    outline: none;
+    background: var(--paper);
+    border-color: var(--ink);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1.1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-3);
+    pointer-events: none;
+    display: flex;
+}
+
+/* le pastiglie sotto la ricerca: quella scelta prende .is-active
+   (e aria-pressed in HTML, per lo screen reader) */
+.spirit-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-bottom: 2.75rem;
+}
+
+.spirit-chip {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--rule-2);
+    border-radius: var(--radius-pill);
+    background: var(--paper);
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: border-color 0.18s var(--ease),
+                background-color 0.18s var(--ease),
+                color 0.18s var(--ease);
+}
+
+.spirit-chip:hover {
+    border-color: var(--ink-3);
+}
+
+.spirit-chip.is-active {
+    background: var(--bitter);
+    border-color: var(--bitter);
+    color: #fff;
+}
+
+

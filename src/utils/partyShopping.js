@@ -6,12 +6,10 @@ import {
 } from "./partyInventory.js";
 
 // quante persone si possono stimare a una festa: zero vuol dire "non
-// l'ho detto", ed è un valore legittimo perché il numero è facoltativo
+// l'ho detto"
 export const MIN_PARTY_PEOPLE = 1;
 export const MAX_PARTY_PEOPLE = 200;
 
-// il numero salvato sulla festa: 0 = non indicato, il resto è un intero
-// dentro i limiti. Quello che finisce su firestore passa sempre da qui
 export function normalizeEstimatedPeople(value) {
     const number = Math.round(Number(value));
 
@@ -23,14 +21,13 @@ export function normalizeEstimatedPeople(value) {
 }
 
 // per fare i conti una persona ci vuole per forza: se l'host non ha
-// indicato niente mostro le dosi per uno, che è il menù "una volta a
-// testa" nel caso più piccolo possibile
+// indicato niente mostro le dosi per uno
 export function peopleForShopping(value) {
     return Math.max(MIN_PARTY_PEOPLE, normalizeEstimatedPeople(value));
 }
-
+//consiglio AI:
 // sotto il litro i millilitri si leggono meglio, sopra no: "2,1 l" dice
-// più di "2100 ml" quando si è davanti allo scaffale
+// più di "2100 ml"
 export function formatVolume(ml) {
     const value = Math.round(Number(ml) || 0);
 
@@ -47,9 +44,7 @@ export function formatVolume(ml) {
 // serve perché ognuno degli invitati possa ordinare almeno una volta
 // ogni drink. Quindi la somma delle dosi di tutti i drink scelti,
 // moltiplicata per le persone attese.
-//
-// Gli extra (ghiaccio, scorze, menta) restano fuori dal conto in ml,
-// come ovunque nell'app: lì conta solo averli o non averli.
+
 export function buildPartyShoppingList({
     drinks = [],
     people = 1,
@@ -154,8 +149,7 @@ export function toggleBoughtIngredient(inventory, row, bought) {
             extras.delete(row.name);
         }
     } else if (bought) {
-        // una ricetta può citare una bottiglia senza dose: lì non ho un
-        // numero da mettere e ricado sulla bottiglia intera
+        // una ricetta può citare una bottiglia senza dose
         const target = row.needed > 0 ? row.needed : defaultAmountFor(row.name);
 
         amounts[row.name] = Math.max(target, current.amounts[row.name] ?? 0);

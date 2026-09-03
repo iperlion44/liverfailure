@@ -12,7 +12,7 @@ function ingredientSummary(drink) {
 }
 
 // il menù è calcolato in tempo reale sull'inventario della festa: quando
-// una bottiglia finisce il drink scivola tra i non disponibili da solo.
+// una bottiglia finisce il drink va tra i non disponibili da solo.
 // i drink tolti dal bancone sono una scelta a parte del bar: anche con
 // tutti gli ingredienti a disposizione restano fuori dal menù ordinabile
 function PartyMenu({

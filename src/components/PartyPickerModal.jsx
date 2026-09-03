@@ -4,7 +4,7 @@ import { PARTY_NAME_MAX_LENGTH } from "../firebase/party";
 import { formatPartyCode } from "../utils/partyCode";
 
 // il selettore che appare toccando il "più" su una card in Esplora:
-// mostra le feste aperte (spuntando quelle che hanno già il drink) e
+// mostra le feste aperte e
 // offre di aprirne una nuova al volo, senza lasciare la pagina
 function PartyPickerModal({
     drink,

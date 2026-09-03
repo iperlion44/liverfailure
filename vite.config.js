@@ -2,9 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
-// react e il router cambiano solo quando aggiorno una dipendenza, quindi
-// li metto in un chunk a parte: così un deploy con solo modifiche al
-// codice mio non fa riscaricare ~230kb di libreria dal service worker
 const VENDOR_CHUNKS = [
     { chunk: "vendor-react", packages: ["react", "react-dom", "scheduler"] },
     { chunk: "vendor-router", packages: ["react-router", "react-router-dom"] }

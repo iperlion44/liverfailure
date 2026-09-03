@@ -1,0 +1,45 @@
+/* =========================================================
+   8. PAGINA / INTESTAZIONI
+========================================================= */
+
+/* Cosa trovi qui:
+   La testata che apre ogni schermata: .page e' il contenitore,
+   .page-head la riga con titolo a sinistra e contatore (.count) a destra.
+   E' quella barra con la linea sottile sotto che vedi in cima a Esplora,
+   Preferiti, I miei drink, Dispensa.
+*/
+
+.page {
+    padding-block: clamp(2.5rem, 6vw, 4.5rem) 0;
+    min-height: 60vh;
+}
+
+.page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 2.5rem;
+}
+
+.page-head-text > .eyebrow {
+    margin-bottom: 0.7rem;
+}
+
+.page-head-text > .lede {
+    margin-top: 0.75rem;
+}
+
+.count {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    white-space: nowrap;
+}
+
+

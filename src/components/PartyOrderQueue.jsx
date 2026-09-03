@@ -24,9 +24,7 @@ export function OrderStatus({ status }) {
     );
 }
 
-// la coda del bar: ordinata per orario di arrivo, con i pulsanti per
-// far avanzare lo stato. il passaggio a "pronto" è quello che scala
-// davvero l'inventario, quindi può anche fallire
+// la coda del bar: ordinata per orario di arrivo, con i pulsanti per far avanzare lo stato.
 function PartyOrderQueue({
     orders,
     onStart,

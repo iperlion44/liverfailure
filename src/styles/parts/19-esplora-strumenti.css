@@ -1,0 +1,98 @@
+/* =========================================================
+   19. ESPLORA — ORDINAMENTO E FILTRI
+========================================================= */
+
+/* Cosa trovi qui:
+   La riga di strumenti sopra la griglia di Esplora:
+   .sort-switch / .sort-option  l'interruttore dell'ordinamento
+                                (Recenti / Votati / Gia' fattibili)
+   .filter-toggle               il pulsante "Filtri", che apre il pannello;
+                                .filter-toggle-count e' il pallino con il
+                                numero di filtri attivi
+*/
+
+/* Ordinamento e filtro dispensa sopra la griglia di Esplora */
+.explore-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+}
+
+.sort-switch {
+    display: inline-flex;
+    border: 1px solid var(--rule-2);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.sort-option {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.5rem 0.95rem;
+    color: var(--ink-2);
+    background: var(--paper);
+    transition: background-color 0.18s var(--ease), color 0.18s var(--ease);
+}
+
+.sort-option + .sort-option {
+    border-left: 1px solid var(--rule-2);
+}
+
+.sort-option.is-active {
+    background: var(--ink);
+    color: #fff;
+}
+
+.filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--rule-2);
+    border-radius: var(--radius-pill);
+    background: var(--paper);
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: border-color 0.18s var(--ease),
+                background-color 0.18s var(--ease),
+                color 0.18s var(--ease);
+}
+
+.filter-toggle:hover {
+    border-color: var(--ink-3);
+}
+
+.filter-toggle.is-active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+}
+
+.filter-toggle-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    padding: 0 0.3rem;
+    border-radius: var(--radius-pill);
+    background: var(--bitter);
+    color: #fff;
+    font-size: 0.65rem;
+    line-height: 1;
+}
+
+.filter-toggle.is-active .filter-toggle-count {
+    background: #fff;
+    color: var(--ink);
+}
+
+

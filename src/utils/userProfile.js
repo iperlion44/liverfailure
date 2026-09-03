@@ -1,8 +1,7 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
 import db from "../firebase/firestore";
-
-//consiglio da IA:
+//consiglio AI:
 // la salvo in firestore come data URL perché il campo photoURL di
 // firebase auth è troppo corto per farci stare un'immagine intera
 export async function fetchProfilePhoto(uid) {

@@ -33,8 +33,6 @@ function Favorites() {
     const [isCached, setIsCached] = useState(false);
     const [removingId, setRemovingId] = useState(null);
 
-    // qui la stellina è sempre "piena": cliccarla toglie il drink dai
-    // preferiti e lo fa sparire subito dalla griglia
     const handleRemoveFavorite = async (drink) => {
         if (!user) {
             return;
@@ -118,8 +116,7 @@ function Favorites() {
                 const validDrinks = results.filter((result) => result.drink).map((result) => result.drink);
 
                 // se il drink è stato cancellato, o messo privato da chi
-                // l'ha scritto, il riferimento nei preferiti resta
-                // "orfano": lo tolgo sia da firestore che dalla cache
+                // l'ha scritto lo tolgo sia da firestore che dalla cache
                 const staleIds = results.filter((result) => !result.drink).map((result) => result.id);
 
                 if (staleIds.length > 0) {

@@ -1,0 +1,96 @@
+/* =========================================================
+   23. FESTA — SCHEDE PREPARA E SPESA
+========================================================= */
+
+/* Cosa trovi qui:
+   Le due schede della festa che si usano PRIMA che cominci:
+
+   .party-planner*   "Prepara": scegli i drink del menu (PartyPlanner.jsx)
+   .party-shopping*  "Spesa": quanto comprare per N persone (PartyShopping.jsx)
+   .shopping-line    una riga della lista
+
+   Stati di una riga: .is-bought gia' presa (barrata),
+   .is-short ce l'hai ma non basta per tutti.
+
+   La lista .shopping e' definita in 20-dispensa.css.
+*/
+
+/* Scheda "Prepara": la lista dei drink scelti da Esplora */
+.party-planner section + section,
+.party-planner section + .shopping {
+    margin-top: 2rem;
+}
+
+.party-planner .empty {
+    margin-top: 1.25rem;
+}
+
+/* i due modi di aggiungere un drink al menù stanno sulla stessa riga:
+   la libreria pubblica e le proprie ricette, private comprese */
+.party-planner-add {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.shopping-head-have {
+    margin-top: 1.5rem;
+}
+
+/* Scheda "Spesa": quanto comprare perché ogni invitato possa ordinare
+   almeno una volta ogni drink del menù. Esiste solo a festa ferma */
+.party-shopping-people {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.party-shopping .shopping {
+    margin-top: 1.25rem;
+}
+
+/* riga della spesa: a sinistra il nome, a destra il numero che conta,
+   cioe' quanto manca */
+.shopping-line {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.shopping-note {
+    font-size: 0.78rem;
+    color: var(--ink-3);
+}
+
+/* quello che hai gia' preso si barra e resta al suo posto, come su un
+   foglietto vero: non sparisce e non si sposta */
+.shopping-list li.is-bought {
+    color: var(--ink-3);
+}
+
+.shopping-list li.is-bought .shopping-line span,
+.shopping-list li.is-bought .ingredient-qty {
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+
+/* "ce l'hai ma non basta" e' un rabbocco, non una mancanza: niente
+   rosso, sarebbe un allarme sbagliato */
+.shopping-list li.is-short .ingredient-qty {
+    color: var(--ink-2);
+}
+
+.shopping-done {
+    margin-top: 1rem;
+    margin-bottom: 0;
+}
+
+/* l'avviso "non ho salvato le persone" si porta dietro il "Riprova":
+   il numero scritto resta a video, il pulsante lo rimanda e basta */
+.party-shopping .notice .btn {
+    display: inline-flex;
+    margin-left: 0.6rem;
+    vertical-align: middle;
+}
+
+

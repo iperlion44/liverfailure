@@ -1,0 +1,197 @@
+/* =========================================================
+   13. DETTAGLIO DRINK
+========================================================= */
+
+/* Cosa trovi qui:
+   La pagina di un singolo drink (pages/DrinkDetails.jsx):
+   .back-link       il "Torna indietro" in alto
+   .detail-image    la foto grande
+   .detail-title    nome, autore, descrizione
+   .recipe          la ricetta: ingredienti a sinistra, procedimento a destra
+   .detail-actions  i pulsanti (preferiti, aggiungi al menu, modifica)
+   .fav-mark        la spunta animata quando salvi nei preferiti
+
+   Le stelle e i commenti stanno in 17-recensioni.css.
+*/
+
+.detail {
+    padding-block: clamp(2rem, 5vw, 3.5rem) 0;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 2rem;
+    transition: color 0.18s var(--ease);
+}
+
+.back-link:hover {
+    color: var(--ink);
+}
+
+.detail-image {
+    display: block;
+    width: 100%;
+    max-width: 360px;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--rule-2);
+    margin: 0 auto 2rem;
+}
+
+.detail-label {
+    position: relative;
+    padding: clamp(2.5rem, 6vw, 3.75rem) clamp(1.5rem, 5vw, 3rem);
+    border: 1px solid var(--rule-2);
+    border-radius: var(--radius-sm);
+    background: var(--paper-2);
+    text-align: center;
+}
+
+.detail-label::before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border: 1px solid var(--rule-2);
+    border-radius: 3px;
+    pointer-events: none;
+}
+
+.detail-mark {
+    position: relative;
+    display: block;
+    width: 36px;
+    height: 1.5px;
+    background: var(--bitter);
+    margin: 0 auto 1.5rem;
+}
+
+.detail-title {
+    position: relative;
+    margin-bottom: 1.1rem;
+}
+
+.detail-author {
+    position: relative;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+}
+
+.detail-desc {
+    position: relative;
+    max-width: 46ch;
+    margin: 1.5rem auto 0;
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--ink-2);
+    text-wrap: pretty;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Ricetta: ingredienti a sinistra, procedimento a destra */
+.recipe {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: clamp(2rem, 5vw, 4rem);
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+}
+
+.recipe-block-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 500;
+    margin: 0.75rem 0 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--rule);
+}
+
+.recipe-text {
+    white-space: pre-line;
+    line-height: 1.75;
+    color: var(--ink-2);
+    text-wrap: pretty;
+}
+
+/* la lista degli ingredienti: numerino, nome, dose a destra */
+.ingredient-list {
+    list-style: none;
+}
+
+.ingredient-list li {
+    display: flex;
+    gap: 0.9rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--rule);
+    line-height: 1.5;
+}
+
+.ingredient-index {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--ink-3);
+    padding-top: 0.25rem;
+    flex-shrink: 0;
+}
+
+.ingredient-qty {
+    color: var(--ink-3);
+}
+
+/* la riga dei pulsanti sotto la ricetta */
+.detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--rule);
+}
+
+.btn-fav.is-saved {
+    background: var(--bitter);
+    border-color: var(--bitter);
+    color: #fff;
+}
+
+/* Segno di spunta animato al salvataggio nei preferiti */
+.fav-mark {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.fav-mark-path {
+    stroke-dasharray: 16;
+    stroke-dashoffset: 0;
+}
+
+.fav-mark-draw .fav-mark-path {
+    stroke-dashoffset: 16;
+    animation: fav-draw 0.32s var(--ease) 0.05s forwards;
+}
+
+@keyframes fav-draw {
+    to { stroke-dashoffset: 0; }
+}
+
+.btn-fav-settle {
+    animation: fav-settle 0.4s var(--ease);
+}
+
+@keyframes fav-settle {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+

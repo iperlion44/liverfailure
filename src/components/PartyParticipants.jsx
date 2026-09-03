@@ -1,8 +1,7 @@
 import { ROLE_BAR, ROLE_CUSTOMER } from "../firebase/party";
 import { formatRelativeDate } from "../utils/dates";
 
-// solo l'host promuove: se chiunque potesse farsi bar da solo, il codice
-// della festa diventerebbe il permesso di scalare l'inventario altrui
+// solo l'host promuove
 function PartyParticipants({ participants, hostId, isHost, currentUserId, onChangeRole, busyId = "" }) {
     if (participants.length === 0) {
         return <p className="recipe-text">Per ora ci sei solo tu.</p>;

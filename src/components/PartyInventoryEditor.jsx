@@ -14,20 +14,13 @@ import { IconPlus } from "./NavIcons";
 const ALCOLICI = [...SPIRITS].sort((first, second) => first.localeCompare(second, "it"));
 const ANALCOLICI = [...NON_ALCOHOLIC].sort((first, second) => first.localeCompare(second, "it"));
 
-// niente più pulsante "Salva": ogni modifica va sul server da sola,
-// sennò un drink appena tornato disponibile resta segnato come
-// "non disponibile" nel menù finché qualcuno non si ricorda di salvare
+// ogni modifica va sul server da sola,
+
 const AUTOSAVE_DEBOUNCE_MS = 700;
 
 function PartyInventoryEditor({ inventory, onSave, saving = false, menuDrinks = [] }) {
     const { inventory: pantry } = useInventory();
 
-    // finché non tocco niente seguo l'inventario vero, che intanto si
-    // muove da solo quando qualcuno serve un drink. appena modifico
-    // lavoro sulla mia copia, sennò mi cancellerebbe sotto le mani
-    // quello che sto scrivendo; mi tengo anche la base da cui sono
-    // partito, così al salvataggio si può capire cosa ho cambiato io
-    // e cosa invece è cambiato per conto suo
     const [edit, setEdit] = useState(null);
     const [pickingCategory, setPickingCategory] = useState(null);
     const [toAdd, setToAdd] = useState([]);
@@ -98,7 +91,7 @@ function PartyInventoryEditor({ inventory, onSave, saving = false, menuDrinks = 
         [menuDrinks, owned]
     );
 
-    // spuntare un ingrediente mancante lo mette sul bancone per davvero,
+    // spuntare un ingrediente mancante lo mette sul bancone,
     // con la dose di default: sparisce dalla lista della spesa e il menù
     // (che legge lo stesso inventario) si aggiorna da solo
     const markPurchased = (name) => {

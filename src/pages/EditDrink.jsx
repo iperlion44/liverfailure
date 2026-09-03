@@ -188,7 +188,7 @@ function EditDrink() {
         const trimmedPreparation = preparation.trim();
 
         // stessa cosa di CreateDrink: required non basta, firestore
-        // rifiuta le stringhe vuote quindi controllo prima io
+        // rifiuta le stringhe vuote quindi controllo prima
         if (!trimmedName) {
             setError("Dai un nome al drink.");
             return;

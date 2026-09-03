@@ -3,10 +3,10 @@ import { DESCRIPTION_MAX_LENGTH } from "./drink.js";
 export const RATING_MIN = 1;
 export const RATING_MAX = 5;
 
-// stessa lunghezza della descrizione di un drink: se 300 caratteri
-// bastano per raccontare la ricetta, bastano anche per commentarla
+// stessa lunghezza della descrizione di un drink
 export const REVIEW_MAX_LENGTH = DESCRIPTION_MAX_LENGTH;
 
+//consiglio AI:
 // l'aggregato tiene la SOMMA dei voti, non la media. sembra un dettaglio
 // ma è quello che rende l'aggregato verificabile: con la somma le regole
 // firestore possono controllare l'equazione esatta ("il totale è
@@ -42,9 +42,6 @@ export function averageOf(aggregate) {
     return ratingCount > 0 ? ratingTotal / ratingCount : 0;
 }
 
-// il risultato deve corrispondere esattamente a quello che le regole si
-// aspettano: +1 voto quando la recensione nasce, stesso conteggio quando
-// la cambio, -1 quando la tolgo. niente arrotondamenti in mezzo
 export function applyReview(aggregate, { previousRating = null, nextRating = null } = {}) {
     const current = sanitize(aggregate);
 
@@ -61,10 +58,6 @@ export function applyReview(aggregate, { previousRating = null, nextRating = nul
         ratingCount += 1;
     }
 
-    // togliendo l'ultima recensione conteggio e totale arrivano a zero
-    // insieme; se ci arrivasse solo uno dei due vuol dire che l'aggregato
-    // era già fuori sincrono, e allora meglio azzerare che scrivere
-    // numeri impossibili
     if (ratingCount <= 0 || ratingTotal <= 0) {
         return emptyRating();
     }
@@ -72,6 +65,7 @@ export function applyReview(aggregate, { previousRating = null, nextRating = nul
     return { ratingTotal, ratingCount };
 }
 
+//consiglio AI:
 // media bayesiana: un drink con un solo 5 non deve scavalcare quello
 // con venti voti a 4,6. finché i voti sono pochi il punteggio resta
 // attaccato alla media di partenza

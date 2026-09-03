@@ -22,7 +22,7 @@ import { IconPlus } from "./NavIcons";
 //
 // Il numero di persone non è roba di questa scheda: lo tiene la stanza
 // (PartyRoom), sennò cambiando scheda mentre il salvataggio è ancora in
-// attesa il numero appena scritto sparirebbe. Qui arriva già risolto
+// attesa il numero appena scritto sparirebbe.
 function PartyShopping({
     drinks = [],
     inventory,
@@ -56,10 +56,6 @@ function PartyShopping({
         commit(Math.min(MAX_PARTY_PEOPLE, Math.max(MIN_PARTY_PEOPLE, people + delta)));
     };
 
-    // a trenta invitati nessuno preme il "+" trenta volte: il numero si
-    // scrive anche a mano. Mentre si scrive tengo la stringa così com'è
-    // (si può svuotare il campo per riscriverlo), ma salvo solo quando
-    // diventa un numero valido, e al blur torno a mostrare quello vero
     const typePeople = (value) => {
         setTyped(value);
 
@@ -178,8 +174,7 @@ function PartyShopping({
                     {rows.map((row) => {
                         // tre stati, non due: preso, ce l'hai ma per quante
                         // persone aspetti non basta, non ce l'hai proprio.
-                        // Il secondo non è un ingrediente mancante ed è
-                        // sbagliato scriverglielo: è un rabbocco
+                        
                         const short = !row.enough && row.owned;
                         const classNames = [row.enough ? "is-bought" : "", short ? "is-short" : ""]
                             .filter(Boolean)

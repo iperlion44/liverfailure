@@ -13,7 +13,6 @@ function formatAmount(value) {
         return String(value);
     }
 
-    // una cifra dopo la virgola basta: "12,5 ml" si capisce, "12,47" no
     return value.toFixed(1).replace(".", ",");
 }
 

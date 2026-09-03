@@ -1,0 +1,162 @@
+/* =========================================================
+   6. BOTTONI
+========================================================= */
+
+/* Cosa trovi qui:
+   Tutti i pulsanti. Si parte sempre da .btn (forma e spaziatura) e si
+   aggiunge una variante: class="btn btn-primary btn-sm".
+
+   .btn-primary       arancione pieno, l'azione principale della pagina
+   .btn-hero          come primary ma piu grande (home)
+   .btn-success       verde, per salvare o confermare
+   .btn-outline       solo bordo, azione secondaria
+   .btn-quiet         grigio, azione di servizio
+   .btn-danger-quiet  rosso, per eliminare
+   .btn-sm  piccolo   .btn-block  a tutta riga
+*/
+
+/* la base comune a tutti: nessun colore, solo forma e allineamento */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    min-height: 52px;
+    padding: 0.8rem 1.7rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid transparent;
+    font-size: 1.02rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    transition: background-color 0.18s var(--ease),
+                border-color 0.18s var(--ease),
+                color 0.18s var(--ease),
+                box-shadow 0.12s var(--ease),
+                transform 0.12s var(--ease);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* L'azione principale: arancio  su un'ombra, e alla pressione
+   scende come un tasto.*/
+.btn-primary {
+    background: var(--shot);
+    color: #fff;
+    box-shadow: 0 3px 0 var(--shot-shadow);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--shot-dark);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 0 0 var(--shot-shadow);
+}
+
+.btn-primary:disabled {
+    box-shadow: 0 3px 0 var(--shot-shadow);
+}
+
+/* Un gradino sopra: l'unica cosa per cui sei entrato in questa schermata.*/
+.btn-hero {
+    min-height: 60px;
+    padding-inline: 2rem;
+    font-size: 1.12rem;
+}
+
+.btn-hero svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Verde solo per salvare o confermare: usato solo li', cosi' resta
+   riconoscibile a colpo d'occhio */
+.btn-success {
+    background: var(--success);
+    color: #fff;
+    box-shadow: 0 3px 0 var(--success-shadow);
+}
+
+.btn-success:hover:not(:disabled) {
+    background: var(--success-dark);
+}
+
+.btn-success:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 0 0 var(--success-shadow);
+}
+
+/* azione secondaria: niente riempimento, solo il bordo */
+.btn-outline {
+    border-width: 1.5px;
+    border-color: var(--ink-3);
+    color: var(--ink);
+    background: var(--paper);
+}
+
+.btn-outline:hover:not(:disabled) {
+    border-color: var(--ink);
+    background: var(--paper-2);
+}
+
+/* il piu discreto: sembra testo, si accende al passaggio */
+.btn-quiet {
+    color: var(--ink-2);
+    font-weight: 500;
+    padding-inline: 0.9rem;
+}
+
+.btn-quiet:hover:not(:disabled) {
+    color: var(--ink);
+}
+
+/* rosso ma non urlato: elimina, rimuovi, esci dalla festa */
+.btn-danger-quiet {
+    color: var(--ink-2);
+    border-color: var(--rule-2);
+    background: var(--paper);
+}
+
+.btn-danger-quiet:hover:not(:disabled) {
+    color: var(--danger);
+    border-color: var(--danger);
+    background: var(--danger-tint);
+}
+
+/* misura ridotta, per i pulsanti dentro le righe di lista */
+.btn-sm {
+    min-height: 42px;
+    padding: 0.5rem 1.15rem;
+    font-size: 0.9rem;
+    box-shadow: none;
+}
+
+.btn-sm:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+/* occupa tutta la riga */
+.btn-block {
+    width: 100%;
+}
+
+/* sul telefono l'azione principale prende tutta la riga: e' li' che
+   arriva il pollice, e non c'e' niente da cercare */
+@media (max-width: 640px) {
+    .btn-hero {
+        width: 100%;
+    }
+}
+
+

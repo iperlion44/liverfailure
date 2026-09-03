@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from "react";
-
+//consiglio AI:
 // tengo una MediaQueryList per stringa invece di ricrearla ogni volta, perche'window.matchMedia' è pesante e non voglio fare un sacco di oggetti identici
 const lists = new Map();
 
@@ -13,7 +13,7 @@ function listFor(queryString) {
 
     return list;
 }
-
+//consiglio AI:
 // serve per non montare proprio un componente che a quella larghezza
 // il CSS nasconderebbe comunque
 export function useMediaQuery(queryString) {

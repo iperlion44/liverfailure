@@ -41,13 +41,10 @@ export const ORDER_STATUSES = [ORDER_QUEUED, ORDER_PREPARING, ORDER_READY, ORDER
 
 export const PARTY_NAME_MAX_LENGTH = 60;
 
-// il documento della festa ha come id il codice stesso: così per entrare
-// basta leggere un documento (getDoc), e le regole possono vietare di
-// elencare la collection senza impedire a chi ha il codice di entrare
+
 const INVENTORY_DOC_ID = "current";
 
-// errori che l'utente deve leggere così come sono ("il gin è finito"),
-// separati da quelli tecnici che finiscono solo in console
+// errori che l'utente deve leggere così come sono ("il gin è finito")
 export class PartyError extends Error {
     constructor(message) {
         super(message);
@@ -79,8 +76,7 @@ export function inventoryRef(code) {
     return doc(db, "partySessions", normalizePartyCode(code), "inventory", INVENTORY_DOC_ID);
 }
 
-// le regole tagliano i nomi a 80 caratteri: meglio accorciare qui che
-// farsi rifiutare la scrittura da firestore
+// le regole di firestore tagliano i nomi a 80 caratteri
 function displayNameOf(user) {
     const name = user?.displayName || user?.email?.split("@")[0] || "";
 
@@ -231,7 +227,7 @@ export function subscribeParticipants(code, onChange, onError) {
 
 // con serverTimestamps: "estimate" l'ordine appena mandato ha già un
 // orario invece di un null, sennò per un attimo salta in cima alla coda
-// e sembra arrivato prima di quelli veri
+// e sembra arrivato prima
 export function subscribeOrders(code, onChange, onError) {
     return onSnapshot(
         query(ordersRef(code), orderBy("createdAt", "asc")),
@@ -296,10 +292,6 @@ export async function savePartyInventory({ code, base, inventory }) {
     });
 }
 
-// quando l'host aggiorna la dispensa personale, le feste ancora aperte
-// ricevono solo le aggiunte: leggo il bancone fresco dentro la
-// transazione così non scavalco quello che un bar ha appena servito o
-// aggiunto a mano
 export async function syncPartyInventoryFromPantry({ code, pantry }) {
     return runTransaction(db, async (transaction) => {
         const currentRef = inventoryRef(code);
@@ -356,8 +348,7 @@ export async function setPartyActive({ code, active }) {
 }
 
 // il menù è la lista di drink che il bar ha scelto di poter servire: si
-// modifica sia in preparazione sia a festa già avviata, per aggiungere
-// o togliere qualcosa al volo
+// modifica sia in preparazione sia a festa già avviata
 export async function setPartyMenu({ code, drinkIds }) {
     const cleaned = [...new Set((drinkIds ?? []).filter((id) => typeof id === "string" && id))].slice(0, 200);
 
@@ -368,8 +359,7 @@ export async function setPartyMenu({ code, drinkIds }) {
 // una festa i clienti devono poterlo aprire come gli altri: sul
 // documento del drink tengo i codici delle feste in cui l'ho messo, e le
 // regole lasciano leggere la ricetta a chi è dentro una di quelle.
-// Il limite è lo stesso delle regole, che i codici li controllano uno a
-// uno: le feste più recenti vincono, le vecchie escono dalla lista
+
 export const MAX_DRINK_PARTY_CODES = 8;
 
 export async function setDrinkPartyCodes({ drinkId, codes }) {
@@ -384,10 +374,6 @@ export async function setDrinkPartyCodes({ drinkId, codes }) {
     await updateDoc(doc(db, "drinks", drinkId), { partyCodes: cleaned });
 }
 
-// le ricette del menù che la query pubblica non ha portato: sono i drink
-// privati condivisi nella festa. Vanno lette una a una (la query su
-// isPublic non le prende) e chi non ha il permesso semplicemente non le
-// vede, senza far cadere tutto il menù
 export async function fetchDrinksByIds(ids) {
     const wanted = [...new Set((ids ?? []).filter((id) => typeof id === "string" && id))];
 
@@ -402,8 +388,6 @@ export async function fetchDrinksByIds(ids) {
     return results.filter(Boolean);
 }
 
-// la stima degli invitati si corregge dalla scheda "Spesa": cambia solo
-// quante bottiglie comprare, non tocca né il menù né il bancone
 export async function setPartyPeople({ code, people }) {
     await updateDoc(partyRef(code), {
         estimatedPeople: normalizeEstimatedPeople(people),
@@ -432,7 +416,7 @@ export async function deleteParty({ code }) {
         ...ordersSnapshot.docs.map((document) => document.ref),
         inventoryRef(normalized)
     ];
-
+    //Aggiunta AI:
     // il limite di firestore e' 500 scritture per batch: una festa vera non
     // ci si avvicina, ma spezzo comunque per non fidarmi del caso raro
     for (let start = 0; start < refs.length; start += 400) {
@@ -477,8 +461,7 @@ export async function placeOrder({ code, user, drink }) {
 }
 
 // svuota solo lo storico (pronti/annullati): la coda ancora aperta non
-// la tocco. Le regole fanno cancellare gli ordini solo all'host, quindi
-// non basta essere bar per vedere il pulsante
+// la tocco. Le regole fanno cancellare gli ordini solo all'host
 export async function clearOrderHistory({ code }) {
     const normalized = normalizePartyCode(code);
 
@@ -510,7 +493,8 @@ export async function cancelOrder({ code, orderId }) {
     });
 }
 
-// il passaggio delicato: quando l'ordine diventa "pronto" scalo davvero
+//aggiunta AI:
+// il passaggio delicato: quando l'ordine diventa "pronto" scalo
 // l'inventario. leggo la ricetta dal documento del drink e non da quello
 // che ha scritto il cliente nell'ordine, e faccio tutto in transazione
 // così due bartender sull'ultimo bicchiere non vanno in negativo

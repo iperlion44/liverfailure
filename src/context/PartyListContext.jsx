@@ -25,10 +25,6 @@ export function PartyListProvider({ children }) {
     const [pendingPartyId, setPendingPartyId] = useState("");
     const [creatingParty, setCreatingParty] = useState(false);
 
-    // il caricamento al montaggio/cambio utente sta in un effetto a
-    // parte (funzione locale, come fa InventoryProvider): "refresh" qui
-    // sotto è la stessa logica ma richiamabile da fuori, dopo un'azione
-    // dell'utente su Party o PartyRoom
     useEffect(() => {
         if (authLoading || !user) {
             return undefined;
@@ -102,7 +98,7 @@ export function PartyListProvider({ children }) {
 
     // una voce per ogni festa con almeno un ordine in coda, più vecchia
     // per prima: se ne ho più di una il bottone in navbar deve far
-    // scegliere quale, non indovinare al posto mio
+    // scegliere quale
     const queuedOrderParties = useMemo(() => {
         return openParties
             .map((party) => {

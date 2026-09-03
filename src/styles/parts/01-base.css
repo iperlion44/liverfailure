@@ -1,0 +1,81 @@
+/* =========================================================
+   1. BASE
+========================================================= */
+
+/* Cosa trovi qui:
+   Le regole di partenza, valide ovunque: testo, sfondo, link, bottoni,
+   immagini e il contorno del focus.
+   Se una cosa cambia aspetto in tutto il sito, parte da qui.
+*/
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+::selection {
+    background: var(--bitter);
+    color: #fff;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+    color: inherit;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* il contorno che segue il tasto Tab: vale per tutta l'app, ed e'
+   l'unico riferimento di chi naviga da tastiera */
+:focus-visible {
+    outline: 2px solid var(--bitter);
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+/* il link "Vai al contenuto": sta fuori schermo e compare solo
+   arrivandoci col tasto Tab */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+    padding: 0.75rem 1.25rem;
+    background: var(--ink);
+    color: #fff;
+}
+
+.skip-link:focus {
+    left: 0.75rem;
+    top: 0.75rem;
+}
+
+

@@ -1,5 +1,6 @@
 export const PARTY_CODE_LENGTH = 6;
 
+//consiglio dell'IA:
 // il codice si detta a voce in mezzo alla festa: fuori I, L, O, 0 e 1
 // perché al telefono nessuno capisce la differenza
 const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -30,6 +31,7 @@ export function generatePartyCode(random = Math.random) {
 export function formatPartyCode(value) {
     const code = normalizePartyCode(value);
 
+    //consiglio dell'IA:
     // spezzato a metà si legge e si ricopia molto meglio
     return code.length === PARTY_CODE_LENGTH ? `${code.slice(0, 3)} ${code.slice(3)}` : code;
 }

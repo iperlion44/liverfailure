@@ -126,7 +126,7 @@ function EditProfile() {
 
             // se il fetch della foto è ancora in corso (o fallito),
             // photoData è vuoto e salvare adesso cancellerebbe la
-            // foto vecchia senza motivo
+            // foto vecchia
             if (photoLoaded) {
                 await saveProfilePhoto(user.uid, photoData);
             }

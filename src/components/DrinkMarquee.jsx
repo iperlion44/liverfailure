@@ -10,9 +10,7 @@ import { onIdle } from "../utils/idle";
 // non mostrare proprio la colonna
 const MIN_IMAGES = 6;
 
-// le foto sono data URL dentro al documento quindi pesano parecchio,
-// 16 mi sembravano un buon compromesso tra varietà e mb scaricati
-// per una cosa che è solo decorativa
+// le foto sono data URL dentro al documento quindi pesano parecchio, per questo non ne carico più di 16
 const MAX_IMAGES = 16;
 
 function shuffle(items) {
@@ -80,8 +78,6 @@ async function fetchLatestImages() {
 }
 
 function MarqueeColumn({ drinks, direction }) {
-    // raddoppio la lista e traslo del 50%, così quando l'animazione
-    // riparte la seconda copia è già al posto giusto e non si vede lo scatto
     const track = [...drinks, ...drinks];
     const duration = `${drinks.length * SECONDS_PER_IMAGE}s`;
 
@@ -122,14 +118,12 @@ function DrinkMarquee() {
                     setDrinks(toImageEntries(querySnapshot));
                 }
             } catch (error) {
-                // tanto è solo decorazione, se fallisce pace, la home
-                // funziona comunque senza le colonne
+                
                 console.error(error);
             }
         };
 
         // aspetto che il browser sia libero prima di scaricare foto
-        // che servono solo a fare scena
         const cancelIdle = onIdle(fetchImages);
 
         return () => {

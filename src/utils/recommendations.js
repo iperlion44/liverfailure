@@ -2,9 +2,6 @@ import { normalizeIngredients } from "./drink.js";
 import { isAlcoholic, isExtra } from "./spirits.js";
 import { RATING_MAX, RATING_MIN, bayesianRating } from "./rating.js";
 
-// due drink si somigliano per cosa ci si beve dentro: gli extra
-// (ghiaccio, scorze, cannucce...) non contano, altrimenti due drink
-// diversi risulterebbero "simili" solo perché hanno entrambi il ghiaccio
 export const ALCOHOLIC_WEIGHT = 3;
 export const NON_ALCOHOLIC_WEIGHT = 2;
 
@@ -16,11 +13,13 @@ export function ingredientWeight(name) {
     return NON_ALCOHOLIC_WEIGHT;
 }
 
+//consiglio AI:
 // senza questo termine un drink con un solo ingrediente che ho nei
 // preferiti farebbe 100% di somiglianza e starebbe davanti a uno che
 // ne ha quattro azzeccati su cinque
 export const SMOOTHING = 3;
 
+//consiglio AI:
 // quanto pesa la media voti rispetto alla somiglianza: è un contorno,
 // non deve ribaltare la classifica
 export const RATING_INFLUENCE = 0.15;
@@ -44,7 +43,7 @@ function uniqueIngredientNames(rawIngredients) {
     return names;
 }
 
-// il "profilo di gusto": quanto pesa ogni ingrediente nei preferiti,
+//quanto pesa ogni ingrediente nei preferiti,
 // contando quante volte compare
 export function buildTasteProfile(favorites = []) {
     const profile = new Map();
@@ -93,7 +92,7 @@ export function scoreDrink(drink, profile, rating) {
     if (similarity === 0) {
         return 0;
     }
-
+    // consiglio AI:
     // porto la media bayesiana in scala 0-1 così i due pezzi del
     // punteggio sono confrontabili
     const ratingFactor =

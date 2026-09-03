@@ -1,0 +1,124 @@
+/* =========================================================
+   4. BARRA INFERIORE (mobile)
+========================================================= */
+
+/* Cosa trovi qui:
+   La barra fissa in fondo allo schermo del telefono (sempre navbar.jsx).
+   Tutto sta dentro una sola media query: sopra gli 860px non esiste.
+
+   .tab-bar        la barra
+   .tab-link       una voce: icona sopra, etichetta sotto
+   .tab-link-key   "Festa", l'unica con l'icona dentro un bollo rosso
+   .tab-link-cta   "Registrati", che prende il suo posto se non hai l'account
+*/
+
+/* di base non c'e': esiste solo dentro la media query qui sotto */
+.tab-bar {
+    display: none;
+}
+
+/* tutta la barra sta qui dentro: prima la barra, poi le voci
+   (.tab-link), poi quella evidenziata (.tab-link-key) */
+@media (max-width: 860px) {
+
+    .tab-bar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 40;
+        display: flex;
+        align-items: stretch;
+        justify-content: space-around;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: saturate(1.6) blur(10px);
+        border-top: 1px solid var(--rule);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+    }
+
+    .tab-link {
+        display: flex;
+        flex: 1 1 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.28rem;
+        min-height: 64px;
+        padding-block: 0.4rem;
+        /* grigio scuro (--ink-2): a questa misura il grigio chiaro non
+           era leggibile, 3.4:1 contro 6.8:1 di contrasto */
+        color: var(--ink-2);
+        transition: color 0.18s var(--ease);
+    }
+
+    /* altezza fissa, quanto il bollo di "Festa": cosi' le cinque
+       etichette restano allineate sulla stessa riga */
+    .tab-link-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 38px;
+    }
+
+    .tab-link-icon svg {
+        width: 21px;
+        height: 21px;
+    }
+
+    .tab-link-label {
+        font-size: 0.68rem;
+        font-weight: 500;
+        line-height: 1.15;
+        letter-spacing: 0.01em;
+    }
+
+    .tab-link.is-active {
+        color: var(--bitter);
+    }
+
+    /* "Festa": la voce centrale, l'unica dentro un bollo rosso.*/
+    .tab-link-key .tab-link-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--bitter);
+        color: var(--paper);
+        box-shadow: 0 6px 14px -8px rgba(163, 42, 34, 0.9);
+        transition: background 0.18s var(--ease);
+    }
+
+    .tab-link-key .tab-link-icon svg {
+        width: 23px;
+        height: 23px;
+        stroke-width: 1.5;
+    }
+
+    .tab-link-key .tab-link-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--bitter);
+    }
+
+    .tab-link-key.is-active .tab-link-icon {
+        background: var(--bitter-dark);
+    }
+
+    /* voce di richiamo ("Registrati" se non hai l'account): stessa forma
+       delle altre, ma colorata perche' e' l'azione da suggerire */
+    .tab-link-cta {
+        color: var(--bitter);
+    }
+
+    .tab-link-cta .tab-link-label {
+        font-weight: 700;
+    }
+
+    /* spazio in fondo alla pagina pari alla barra, altrimenti l'ultimo
+       blocco di contenuto (o il footer) resta nascosto sotto */
+    body {
+        padding-bottom: calc(70px + env(safe-area-inset-bottom));
+    }
+}
+
+

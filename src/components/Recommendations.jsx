@@ -82,8 +82,7 @@ function Recommendations() {
                 setRatings(allRatings);
                 setLoaded(true);
             } catch (error) {
-                // i consigli sono un extra: se non arrivano, la home
-                // resta quella di prima
+                
                 console.error(error);
             }
         };

@@ -2,8 +2,7 @@ import { writeCache } from "./localCache.js";
 import { normalizePartyCode } from "./partyCode.js";
 
 // le feste a cui ho partecipato non le posso ritrovare con una query
-// (le regole vietano di elencare le sessioni), quindi mi segno i codici
-// qui sul dispositivo
+// quindi mi segno i codici qui sul dispositivo
 export const getPartiesCacheKey = (uid) => `parties-${uid}`;
 
 const MAX_REMEMBERED = 6;

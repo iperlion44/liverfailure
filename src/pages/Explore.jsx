@@ -85,6 +85,7 @@ function Explore() {
     const party = usePartyPicker();
     const { favoriteActionFor } = useFavoriteToggle(user);
 
+    //bugfix AI: al cambio account la dispensa cambia, quindi anche i drink:
     // la ricerca della home passa il termine nell'URL (?q=...): al primo
     // arrivo qui vince quella, altrimenti si riparte da dove si era
     // rimasti nella scheda (i filtri salvati in sessionStorage)
@@ -122,8 +123,7 @@ function Explore() {
                 setError("");
                 setIsOffline(false);
 
-                // qui non tengo una cache della libreria condivisa,
-                // offline non c'è niente di affidabile da far vedere
+                // se non c'è connessione, non posso caricare nulla
                 if (!navigator.onLine) {
                     throw new Error("Offline");
                 }
@@ -201,8 +201,6 @@ function Explore() {
         return () => clearTimeout(warningTimeoutRef.current);
     }, []);
 
-    // tolgo ?q= dall'URL una volta letto: da qui in poi il campo di
-    // ricerca è la fonte di verità, non l'indirizzo
     useEffect(() => {
         if (consumedQueryRef.current) {
             return;
@@ -265,6 +263,7 @@ function Explore() {
         setSort(SORT_MAKEABLE);
     };
 
+    //consiglio dell:AI
     // uso useDeferredValue perché la griglia con tutte le foto dentro
     // non è leggera da ridisegnare, così il campo di ricerca resta
     // scattante e i risultati arrivano con un attimo di ritardo
@@ -280,7 +279,7 @@ function Explore() {
             })),
         [drinks, inventorySet]
     );
-
+    //consiglio dell'AI:
     // senza useMemo il filtro rifà tutto il giro della libreria ad ogni
     // render, anche per cose che non c'entrano tipo il menu che si apre
     const filteredDrinks = useMemo(() => {
@@ -307,8 +306,7 @@ function Explore() {
 
     const sortedDrinks = useMemo(() => {
         if (sort === SORT_MAKEABLE) {
-            // meno ingredienti mancano, più in alto: chi è già pronto
-            // (0 mancanti) sta in cima
+            // meno ingredienti mancano, più in alto: chi è già pronto sta in cima
             return [...filteredDrinks].sort(
                 (firstDrink, secondDrink) => firstDrink.match.missingCount - secondDrink.match.missingCount
             );
@@ -317,7 +315,7 @@ function Explore() {
         if (sort !== SORT_RATED) {
             return filteredDrinks;
         }
-
+        // consiglio dell'AI:
         // ordino sulla media bayesiana: un solo 5 stelle non deve
         // scavalcare chi ha venti voti alti
         return [...filteredDrinks].sort((firstDrink, secondDrink) => {

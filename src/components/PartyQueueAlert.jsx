@@ -4,8 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { usePartyList } from "../context/usePartyList";
 
 // con una sola festa in coda il bottone ci porta dritto al bancone,
-// con più di una apre un menu: meglio far scegliere che indovinare a
-// caso e mandare l'host nel posto sbagliato
+// con più di una apre un menu
 function PartyQueueAlert() {
     const { queuedOrdersCount, queuedOrderParties } = usePartyList();
     const [isOpen, setIsOpen] = useState(false);

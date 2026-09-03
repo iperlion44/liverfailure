@@ -1,0 +1,125 @@
+/* =========================================================
+   18. HOME — SEZIONI E SCORCIATOIE ACCOUNT
+========================================================= */
+
+/* Cosa trovi qui:
+   Due blocchi che stanno sotto l'apertura della home:
+
+   .home-section   il contenitore di una sezione con titolo e linea
+                   (per esempio "Consigliati per te")
+   .shortcuts      la griglia di quattro riquadri con l'icona tonda che
+                   portano a Dispensa, Festa, I miei drink e Preferiti
+                   (l'elenco vero e' SHORTCUTS in pages/Home.jsx)
+   .recommendation-why  la frasetta "perche' te lo consiglio"
+*/
+
+/* Sezione consigliati in home */
+.home-section {
+    margin-top: var(--section);
+}
+
+.home-section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 2rem;
+}
+
+.home-section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3.5vw, 2.25rem);
+    font-weight: 500;
+    line-height: 1.1;
+    margin-top: 0.6rem;
+}
+
+/* Le scorciatoie: quattro riquadri-link con icona grossa e nome, due
+   per riga gia' sul telefono. Al tocco il colore del disco si allarga
+   a tutto il riquadro */
+.shortcuts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.shortcut {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.1rem;
+    padding: 1.35rem 1.25rem;
+    background: var(--paper);
+    border: 1.5px solid var(--rule-2);
+    border-radius: var(--radius);
+    transition: background-color 0.18s var(--ease),
+                border-color 0.18s var(--ease),
+                transform 0.18s var(--ease);
+}
+
+.shortcut:hover,
+.shortcut:focus-visible {
+    border-color: var(--ink);
+    background: var(--paper-2);
+}
+
+.shortcut:active {
+    transform: translateY(2px);
+}
+
+/* il disco rosso con l'icona dentro: stesso colore (--bitter) per
+   tutti e quattro, cambia solo l'icona */
+.shortcut-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--bitter);
+    color: #fff;
+    transition: background-color 0.18s var(--ease);
+}
+
+.shortcut-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.shortcut:hover .shortcut-icon {
+    background: var(--shot);
+}
+
+.shortcut-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 3.5vw, 1.45rem);
+    font-weight: 500;
+    line-height: 1.1;
+}
+
+@media (min-width: 900px) {
+    .shortcuts {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+    }
+
+    .shortcut {
+        padding: 1.75rem 1.5rem;
+    }
+}
+
+.recommendation-why {
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    line-height: 1.5;
+}
+

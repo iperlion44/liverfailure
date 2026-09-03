@@ -46,9 +46,7 @@ function MyDrinks() {
                 console.error(error);
             });
 
-            // tengo il salvataggio su localStorage fuori dal setDrinks,
-            // in StrictMode gli updater vengono chiamati due volte e
-            // non voglio scrivere doppio
+            // tengo il salvataggio su localStorage fuori dal setDrinks
             const nextDrinks = drinks.filter((drink) => drink.id !== drinkId);
 
             setDrinks(nextDrinks);

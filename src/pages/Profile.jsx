@@ -92,8 +92,7 @@ function Profile() {
             return;
         }
 
-        // doppia conferma: il form da solo è troppo facile da inviare per
-        // sbaglio con un click, qui serve un secondo sì esplicito
+        // doppia conferma
         const confirmed = window.confirm(
             "Eliminare definitivamente il profilo? I tuoi drink e preferiti verranno cancellati e l'azione non si può annullare."
         );
@@ -116,8 +115,7 @@ function Profile() {
             // verrebbero rifiutati
 
             // le recensioni che ho lasciato stanno sparse sotto i drink
-            // degli altri: le tolgo una per una così ogni media torna
-            // giusta invece di restare gonfiata da un utente che non c'è più
+            // degli altri: le tolgo una per una
             const myReviews = await fetchMyReviewRefs(user.uid);
 
             for (const review of myReviews) {

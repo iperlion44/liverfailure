@@ -21,6 +21,7 @@ export function useFavoriteToggle(user) {
     const [favoriteUserId, setFavoriteUserId] = useState(user?.uid ?? null);
     const [pendingFavoriteId, setPendingFavoriteId] = useState(null);
 
+    //consiglio AI:
     // niente useEffect: se l'utente loggato cambia lo noto durante il
     // render e risincronizzo i preferiti dalla cache di quell'utente
     if ((user?.uid ?? null) !== favoriteUserId) {
@@ -89,8 +90,6 @@ export function useFavoriteToggle(user) {
                 writeCachedFavorites(user.uid, nextFavorites);
             }
         } catch (error) {
-            // offline o errore di rete: la modifica resta comunque sul
-            // dispositivo e si sincronizza appena torna la connessione
             console.error(error);
         } finally {
             setPendingFavoriteId(null);

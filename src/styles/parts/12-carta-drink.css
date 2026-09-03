@@ -1,0 +1,239 @@
+/* =========================================================
+   12. GRIGLIA DRINK + CARTA-ETICHETTA (firma)
+========================================================= */
+
+/* Cosa trovi qui:
+   La card del drink (components/DrinkCard.jsx): si vede in Esplora,
+   Preferiti, I miei drink, nei consigliati della home e nel menu festa.
+
+   .drink-grid          la griglia che le dispone
+   .drink-card          la card: testo a sinistra, foto a destra
+   .drink-card::before  la linguetta rossa sulla piega tra le due meta
+   .card-quick-actions  i cerchietti sopra la foto (preferito, festa)
+   .drink-card-name/-desc/-meta   il testo dentro la meta sinistra
+   .status              il pallino pubblico / privato
+
+   Sotto i 640px la card si impila (foto sopra) e ne stanno due per
+   riga: quelle regole stanno in 25-responsive.css.
+*/
+
+/* la griglia: si adatta da sola al numero di colonne che ci stanno */
+.drink-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    align-items: start;
+    gap: 1.25rem;
+}
+
+/* Card divisa in due colonne: testo a sinistra, foto a destra */
+.drink-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 420px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.2s var(--ease),
+                box-shadow 0.2s var(--ease),
+                transform 0.2s var(--ease);
+}
+
+.drink-card-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 1.6rem 1.35rem 1.35rem;
+}
+
+/* Linguetta rossa sulla piega tra testo e foto */
+.drink-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1.5px;
+    height: 22px;
+    background: var(--bitter);
+    transform: translateX(-50%);
+    transform-origin: top;
+    transition: transform 0.28s var(--ease);
+    z-index: 1;
+}
+
+/* solo se c'è il mouse, sennò su touch :hover resta "attaccato"
+   dopo il tap e la card sembra sollevata per sempre */
+@media (hover: hover) {
+    a:hover > .drink-card,
+    .drink-card:hover {
+        border-color: var(--rule-2);
+        box-shadow: var(--lift);
+        transform: translateY(-2px);
+    }
+
+    a:hover > .drink-card::before,
+    .drink-card:hover::before {
+        transform: translateX(-50%) scaleY(1.9);
+    }
+}
+
+.drink-card:active::before {
+    transform: translateX(-50%) scaleY(1.9);
+}
+
+/* la meta destra con la foto (e i cerchietti sopra) */
+.drink-card-photo {
+    position: relative;
+    border-left: 1px solid var(--rule);
+}
+
+/* Pulsanti rotondi sopra la foto per azioni rapide (festa attiva,
+   preferiti) senza dover aprire il dettaglio del drink */
+.card-quick-actions {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 2;
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* il singolo cerchietto. .is-active = gia' nei preferiti / gia' nel menu */
+.card-icon-btn {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--rule-2);
+    background: var(--paper);
+    color: var(--ink-2);
+    box-shadow: var(--lift);
+    transition: background-color 0.18s var(--ease), color 0.18s var(--ease),
+        border-color 0.18s var(--ease), transform 0.18s var(--ease);
+}
+
+.card-icon-btn:hover:not(:disabled) {
+    border-color: var(--ink);
+    color: var(--ink);
+    transform: scale(1.06);
+}
+
+.card-icon-btn.is-active {
+    background: var(--bitter);
+    border-color: var(--bitter);
+    color: #fff;
+}
+
+.card-icon-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.drink-card-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 220px;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* il riempitivo quando il drink non ha foto */
+.drink-card-photo-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 220px;
+    background: var(--paper-2);
+    color: var(--rule-2);
+}
+
+.drink-card-name {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.6rem;
+    text-wrap: balance;
+}
+
+.drink-card-desc {
+    font-size: 0.88rem;
+    color: var(--ink-2);
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.drink-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-top: auto;
+    padding-top: 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+.drink-card-meta-sep {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--rule-2);
+}
+
+/* i pulsanti in fondo alla card (Modifica, Elimina in I miei drink) */
+.drink-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+}
+
+.drink-card-actions .btn {
+    flex: 1 1 0;
+}
+
+/* Stato pubblico / privato */
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.status-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--rule-2);
+}
+
+.status-public {
+    color: var(--bitter);
+}
+
+.status-public .status-dot {
+    background: var(--bitter);
+}
+
+

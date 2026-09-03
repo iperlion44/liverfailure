@@ -1,0 +1,358 @@
+/* =========================================================
+   25. RESPONSIVE
+========================================================= */
+
+/* Cosa trovi qui:
+   Gli adattamenti agli schermi piccoli: se una cosa "sul telefono si
+   vede storta", si aggiusta qui. Sta in fondo apposta, cosi' vince
+   sulle regole scritte prima.
+
+   Le soglie, nell'ordine in cui compaiono:
+     max 860px   la barra in alto diventa un menu che si apre
+     min 861px   ...da qui in su torna una barra normale
+     min 1081px  spazio per staccare Profilo dagli altri link
+     861-1080px  sei link ci stanno solo stringendoli
+     max 640px   card a una colonna (foto sopra), due per riga
+     max 560px   pulsanti a tutta riga, liste in colonna
+     pointer: coarse   bersagli piu grandi se si tocca col dito
+*/
+
+/* TELEFONO E TABLET STRETTO: la barra in alto si chiude nel menu */
+@media (max-width: 860px) {
+
+    .recipe {
+        grid-template-columns: 1fr;
+    }
+
+    .site-header-inner {
+        gap: 0.75rem;
+    }
+
+    .queue-alert {
+        font-size: 0.62rem;
+        padding: 0.35rem 0.6rem;
+    }
+
+    .nav-toggle {
+        display: flex;
+    }
+
+    .site-nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        margin: 0;
+        padding: 0.5rem var(--gutter) 1.25rem;
+        background: var(--paper);
+        border-bottom: 1px solid var(--rule);
+    }
+
+    .site-nav.is-open {
+        display: flex;
+    }
+
+    .nav-link {
+        gap: 0.65rem;
+        padding-block: 0.85rem;
+        border-bottom: 1px solid var(--rule);
+        font-size: 1rem;
+    }
+
+    .nav-link.is-active::after {
+        left: 0;
+        right: auto;
+        width: 18px;
+        bottom: -1px;
+    }
+
+    .nav-actions-mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        padding-top: 1.25rem;
+    }
+
+    .site-actions {
+        display: none;
+    }
+}
+
+/* DA TABLET IN SU: il menu a scomparsa non serve piu */
+@media (min-width: 861px) {
+
+    .nav-actions-mobile {
+        display: none;
+    }
+}
+
+/* solo da 1081px c'e' spazio per staccare "Profilo" dagli altri link:
+   piu' stretto, la barra non regge il margine in piu' */
+@media (min-width: 1081px) {
+
+    .nav-link-account {
+        margin-left: 0.5rem;
+        padding-left: 1.15rem;
+        border-left: 1px solid var(--rule);
+    }
+}
+
+/* con Dispensa e Festa i link della navbar sono sei: tra 861 e 1080px
+   ci stanno solo se stringo lo spazio tra uno e l'altro */
+@media (min-width: 861px) and (max-width: 1080px) {
+
+    .site-header-inner {
+        gap: 1rem;
+    }
+
+    .site-nav {
+        gap: 1.05rem;
+    }
+
+    .nav-link {
+        font-size: 0.86rem;
+    }
+}
+
+/* TELEFONO: la card del drink (e lo scheletro, che ne ricalca la
+   forma). Testo e foto non ci stanno affiancati: card verticale, due
+   per riga, fatta per scorrere in fretta */
+@media (max-width: 640px) {
+
+    .drink-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.7rem;
+    }
+
+    .drink-card {
+        grid-template-columns: 1fr;
+        max-width: none;
+    }
+
+    .drink-card::before {
+        display: none;
+    }
+
+    .drink-card-photo {
+        order: -1;
+        border-left: none;
+        border-bottom: 1px solid var(--rule);
+        aspect-ratio: 1 / 1;
+    }
+
+    .drink-card-image,
+    .drink-card-photo-empty {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+    }
+
+    .drink-card-photo-empty svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .card-quick-actions {
+        top: 0.5rem;
+        right: 0.5rem;
+        gap: 0.35rem;
+    }
+
+    .card-icon-btn {
+        width: 27px;
+        height: 27px;
+    }
+
+    .drink-card-body {
+        padding: 0.8rem 0.7rem 0.85rem;
+    }
+
+    .drink-card-name {
+        font-size: 0.92rem;
+        line-height: 1.28;
+        margin-bottom: 0.35rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* niente sinossi: a questa misura la card serve a scegliere per
+       foto e nome */
+    .drink-card-desc {
+        display: none;
+    }
+
+    .drink-card-meta {
+        margin-top: 0.5rem;
+        padding-top: 0.55rem;
+        gap: 0.3rem 0.4rem;
+        font-size: 0.6rem;
+    }
+
+    .drink-card-meta .stars svg {
+        width: 11px;
+        height: 11px;
+    }
+
+    .drink-card-meta .rating-value {
+        font-size: 0.6rem;
+    }
+
+    /* via il numero di voti: stelle e valore bastano, il conteggio
+       farebbe traboccare la riga */
+    .drink-card-meta .rating-count {
+        display: none;
+    }
+
+    .drink-card-actions {
+        flex-direction: column;
+    }
+
+    /* lo scheletro di caricamento ricalca la stessa forma a due
+       colonne, sennò al primo render lampeggia nel layout vecchio */
+    .skeleton-card {
+        grid-template-columns: 1fr;
+        min-height: 0;
+        max-width: none;
+    }
+
+    .skeleton-card-photo {
+        order: -1;
+        border-left: none;
+        border-bottom: 1px solid var(--rule);
+        aspect-ratio: 1 / 1;
+    }
+
+    .skeleton-card-text {
+        padding: 0.8rem 0.7rem 0.85rem;
+    }
+
+    .skeleton-card-text > div:nth-child(2),
+    .skeleton-card-text > div:nth-child(3),
+    .skeleton-card-text > div:nth-child(4) {
+        display: none;
+    }
+}
+
+/* TELEFONO STRETTO: i pulsanti prendono tutta la riga e le righe di
+   menu, ordini e invitati vanno in colonna
+*/
+@media (max-width: 560px) {
+
+    .page-head {
+        align-items: flex-start;
+    }
+
+    .empty-actions,
+    .form-actions,
+    .detail-actions {
+        flex-direction: column;
+    }
+
+    .empty-actions .btn,
+    .form-actions .btn,
+    .detail-actions .btn {
+        width: 100%;
+    }
+
+    .detail-image {
+        max-width: 100%;
+    }
+
+    /* nelle righe di menù, ordini e partecipanti i pulsanti a fianco
+       diventano illeggibili: li mando a capo a tutta larghezza */
+    .menu-item,
+    .order,
+    .participant,
+    .stock {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    /* azzero il flex-basis: pensato per la riga orizzontale, in colonna
+       diventa altezza e apre un vuoto enorme sotto il testo */
+    .menu-item-text,
+    .order-text,
+    .participant-text,
+    .stock-name {
+        flex: 0 1 auto;
+    }
+
+    .stock > .ingredient-row-qty-group {
+        flex: 0 1 auto;
+    }
+
+    .order-actions {
+        margin-left: 0;
+    }
+
+    .order-actions .btn {
+        flex: 1 1 auto;
+    }
+
+    .menu-item > .btn,
+    .participant > .btn,
+    .stock > .btn {
+        flex: 0 1 auto;
+    }
+
+    .party-code-box {
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .shopping-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stepper {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* pulsanti più grandi se il puntatore è touch, indipendentemente
+   dalla larghezza (un laptop touchscreen ha comunque schermo largo) */
+@media (pointer: coarse) {
+
+    .nav-toggle {
+        height: 44px;
+    }
+
+    .avatar-sm {
+        width: 44px;
+        height: 44px;
+        font-size: 1.05rem;
+    }
+
+    .card-icon-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .stepper-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .spirit-chip {
+        padding: 0.65rem 1.05rem;
+    }
+
+    .back-link {
+        padding-block: 0.5rem;
+        margin-block: -0.5rem 1.5rem;
+    }
+}
+
+

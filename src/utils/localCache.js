@@ -1,7 +1,3 @@
-// le foto dei drink sono data URL salvate nel documento, quindi la cache
-// offline pesa uguale. con localStorage che ha un limite di ~5MB basta
-// poco per andare in errore su setItem e non salvare più niente
-
 const QUOTA_ERROR_NAMES = new Set([
     "QuotaExceededError",
     "NS_ERROR_DOM_QUOTA_REACHED"
@@ -28,7 +24,7 @@ function withoutImages(items) {
 }
 
 // se non entra tutto riprovo senza le foto, tanto la ricetta in sé
-// (ingredienti e preparazione) è la cosa che serve davvero offline
+// è la cosa che serve davvero offline
 export function writeCache(storage, key, items, errorLabel) {
     try {
         storage.setItem(key, JSON.stringify(items));

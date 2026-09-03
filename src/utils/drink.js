@@ -1,5 +1,4 @@
-// oltre questa lunghezza la descrizione esce fuori dalla card, l'ho
-// provato e 300 sembra il punto giusto
+// oltre questa lunghezza la descrizione esce fuori dalla card
 export const DESCRIPTION_MAX_LENGTH = 300;
 
 // per la retrocompatibilità con le ricette vecchie, che avevano gli ingredienti come stringa:
@@ -23,7 +22,6 @@ export function parseIngredients(rawIngredients) {
         .filter(Boolean);
 }
 
-// porto tutto in formato nuovo, con array di oggetti {name, quantity} e quantità opzionale. Se la quantità non c'è, metto stringa vuota
 export function normalizeIngredients(rawIngredients) {
     if (Array.isArray(rawIngredients)) {
         return rawIngredients
@@ -40,8 +38,6 @@ export function normalizeIngredients(rawIngredients) {
     }));
 }
 
-// prende solo il numero da una quantità tipo "50 ml" -> "50", mi
-// serve per il campo number nel form di modifica
 export function extractMlValue(quantity) {
     if (!quantity) {
         return "";
@@ -67,8 +63,7 @@ function trimmed(value) {
 }
 
 // le righe senza nome sono slot vuoti e le butto via. la quantità invece
-// è facoltativa (mi ero dimenticato di gestirlo e le righe con solo il
-// nome sparivano in silenzio al salvataggio, bug fastidioso da trovare)
+// è facoltativa 
 function cleanRows(rows, unit) {
     return rows
         .filter((row) => row && row.name)

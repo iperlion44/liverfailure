@@ -1,0 +1,112 @@
+/* =========================================================
+   10. HOME — colonne di drink nei margini
+========================================================= */
+
+/* Cosa trovi qui:
+   Le due colonne di foto che scorrono ai lati della home, come link
+   verso /explore (components/DrinkMarquee.jsx).
+
+   Esistono solo da 1380px in su: sotto quella soglia non c'e' margine
+   libero, e il componente non viene nemmeno montato (la stessa soglia
+   e' in MARQUEE_BREAKPOINT, pages/Home.jsx).
+*/
+
+/* di base nascoste: si accendono nella media query qui sotto */
+.marquee {
+    display: none;
+}
+
+@media (min-width: 1380px) {
+    .marquee {
+        display: block;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: calc((100vw - var(--shell)) / 2);
+        overflow: hidden;
+        z-index: 1;
+        -webkit-mask-image: linear-gradient(
+            to bottom,
+            transparent 0,
+            #000 120px,
+            #000 calc(100% - 120px),
+            transparent 100%
+        );
+        mask-image: linear-gradient(
+            to bottom,
+            transparent 0,
+            #000 120px,
+            #000 calc(100% - 120px),
+            transparent 100%
+        );
+    }
+
+    .marquee-left {
+        left: 0;
+    }
+
+    .marquee-right {
+        right: 0;
+    }
+}
+
+.marquee-track {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    width: 80px;
+    margin-inline: auto;
+    padding-block: 1.25rem;
+    will-change: transform;
+}
+
+/* la striscia sta attaccata al bordo della finestra: centrata nel
+   margine lascerebbe un vuoto vistoso di fianco */
+.marquee-left .marquee-track {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+.marquee-right .marquee-track {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.marquee-track-down {
+    animation: marquee-down var(--marquee-duration, 60s) linear infinite;
+}
+
+.marquee-track-up {
+    animation: marquee-up var(--marquee-duration, 60s) linear infinite;
+}
+
+/* le singole foto della striscia */
+.marquee-image {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--rule-2);
+    filter: grayscale(0.25);
+    flex-shrink: 0;
+}
+
+@keyframes marquee-down {
+    from { transform: translateY(-50%); }
+    to   { transform: translateY(0); }
+}
+
+@keyframes marquee-up {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marquee-track-down,
+    .marquee-track-up {
+        animation: none;
+    }
+}
+
+

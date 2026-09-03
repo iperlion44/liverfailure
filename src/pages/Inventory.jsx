@@ -7,8 +7,6 @@ import { EXTRAS, NON_ALCOHOLIC, SPIRITS } from "../utils/spirits";
 import { Loader } from "../components/Loader";
 import { IconSearch } from "../components/NavIcons";
 
-// il titolo del gruppo basta: "Alcolici" non ha bisogno di una riga
-// che spieghi cosa sia un alcolico
 const GROUPS = [
     { title: "Alcolici", items: SPIRITS },
     { title: "Analcolici", items: NON_ALCOHOLIC },
@@ -48,6 +46,7 @@ function Inventory() {
 
         const savedInventory = await saveInventory(selected);
 
+        //gestito dall'AI
         // le feste aperte prendono solo le aggiunte, non blocca il salvataggio
         // della dispensa se una festa non risponde
         syncPantryToOpenParties(savedInventory).catch((syncError) => console.error(syncError));

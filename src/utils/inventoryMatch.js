@@ -66,9 +66,6 @@ export function matchLabel(match) {
         return "Puoi farlo ora";
     }
 
-    // versione corta apposta: nel badge sulla card lo spazio e' poco, e
-    // il numero di ingredienti compare subito sotto, quindi il contesto
-    // basta anche senza ripetere la parola "ingrediente"
     return match.missingCount === 1 ? "1 mancante" : `${match.missingCount} mancanti`;
 }
 

@@ -1,9 +1,3 @@
-/* =========================================================
-   LIVERFAILURE — Design tokens
-   Direzione "Etichetta": fondo bianco, inchiostro nero,
-   un solo rosso amaro usato con parsimonia.
-========================================================= */
-
 :root {
 
     /* --- Superfici --- */
@@ -24,13 +18,6 @@
     --bitter: #A32A22;
     --bitter-dark: #7E1F19;
 
-    /* --- Azione: arancio aperitivo --- */
-    /* il rosso amaro resta l'identita' (titoli, occhielli); questo e'
-       il colore del "premi qui" e basta: acceso apposta perche' si veda
-       a braccio teso, al buio, con mezzo drink in mano. Una sola azione
-       arancione per schermata, sennò non e' piu' un'azione.
-       Il tono e' tarato sul contrasto: con il bianco sopra fa 4.6:1,
-       cioe' passa AA. Piu' acceso di cosi' (#F0410C) scendeva a 3.8 */
     --shot: #D93A08;
     --shot-dark: #B32F06;
     --shot-shadow: #7A2004;
@@ -44,10 +31,7 @@
     --success-dark: #21502F;
     --success-shadow: #173A22;
 
-    /* --- Schede della sala festa: un'identita' per postazione, cosi'
-       si riconoscono a colpo d'occhio nella fila di pulsanti. Restano
-       lontane da --shot e --success apposta, per non confondersi con
-       i pulsanti di azione veri e propri sotto ciascuna scheda --- */
+
     --tab-coda: #B8571E;
     --tab-coda-dark: #93450F;
     --tab-bancone: #6E7B3F;

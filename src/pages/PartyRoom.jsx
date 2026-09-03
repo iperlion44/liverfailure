@@ -62,15 +62,13 @@ const TAB_PERSONE = { id: "persone", label: "Persone", icon: IconUser };
 // la spesa ha senso solo mentre la festa è ferma: in preparazione, per
 // sapere cosa comprare prima di aprire le porte, e a festa fermata, per
 // rifare i conti prima di riaprire. Quando si sta servendo sparisce:
-// lì conta il bancone, cioè quello che c'è adesso davvero
+// lì conta il bancone, cioè quello che c'è adesso 
 const BAR_TABS_DRAFT = [TAB_PREPARA, TAB_BANCONE, TAB_SPESA];
 
 const BAR_TABS_LIVE = [TAB_CODA, TAB_MENU, TAB_PREPARA, TAB_BANCONE, TAB_PERSONE];
 
 const BAR_TABS_STOPPED = [TAB_CODA, TAB_MENU, TAB_PREPARA, TAB_BANCONE, TAB_SPESA, TAB_PERSONE];
 
-// le frecce del contatore si premono a raffica: aspetto che l'host si
-// fermi prima di scrivere il numero sulla festa
 const PEOPLE_SAVE_DEBOUNCE_MS = 600;
 
 // del drink alla festa servono il nome e la ricetta; isPublic e authorId
@@ -172,7 +170,7 @@ function PartyRoomView({ code, initialTab }) {
     // la libreria da cui si sceglie il menù pesca dai drink pubblici:
     // sono le ricette che anche un co-bartender può rileggere. Il menù
     // vero e proprio, quello ordinabile, è poi il sottoinsieme che il
-    // bar ha scelto in fase di preparazione (party.menuDrinkIds)
+    // bar ha scelto in fase di preparazione 
     useEffect(() => {
         if (!isParticipant) {
             return undefined;
@@ -196,9 +194,6 @@ function PartyRoomView({ code, initialTab }) {
         };
     }, [isParticipant]);
 
-    // la lista dei codici cambia identità a ogni snapshot anche quando
-    // dentro c'è la stessa roba: la riduco a una stringa, sennò l'effetto
-    // qui sotto ripartirebbe a ogni respiro della festa
     const menuIdsKey = Array.isArray(party?.menuDrinkIds) ? party.menuDrinkIds.join(",") : "";
     const publicIdsKey = useMemo(
         () => publicDrinks.map((drink) => drink.id).join(","),
@@ -233,6 +228,7 @@ function PartyRoomView({ code, initialTab }) {
 
                 setPartyOnlyDrinks(drinks.map((drink) => toCatalogEntry(drink.id, drink)));
 
+                //consiglio dell'AI:
                 // i miei drink privati li leggo comunque, anche se sul
                 // documento manca il codice di questa festa: ma agli
                 // ospiti servirebbe. Capita alle feste messe insieme
@@ -255,9 +251,6 @@ function PartyRoomView({ code, initialTab }) {
         };
     }, [isParticipant, publicDrinksLoaded, publicIdsKey, menuIdsKey, code, user, syncDrinkParties]);
 
-    // quello che ho letto a parte vale solo finché è davvero un drink in
-    // più del menù: se l'host lo toglie, o se nel frattempo è diventato
-    // pubblico, esce di qui senza bisogno di riandare a leggerlo
     const catalog = useMemo(() => {
         const inMenu = new Set(menuIdsKey ? menuIdsKey.split(",") : []);
         const alreadyPublic = new Set(publicDrinks.map((drink) => drink.id));
@@ -307,11 +300,7 @@ function PartyRoomView({ code, initialTab }) {
         return catalog.filter((drink) => party.menuDrinkIds.includes(drink.id));
     }, [catalog, party]);
 
-    // per la spesa contano solo i drink scelti davvero: le feste vecchie
-    // senza menuDrinkIds ordinano da tutta la libreria, ma non ha senso
-    // fare la spesa per ogni drink pubblico che esiste
-    // quello appena scritto vince su quello salvato finché non arriva sul
-    // server; da un altro dispositivo il numero cambia da solo
+    // per la spesa contano solo i drink scelti
     const savedPeople = normalizeEstimatedPeople(party?.estimatedPeople);
     const people = peopleDraft ?? Math.max(1, savedPeople);
     const peopleNotSet = peopleDraft === null && savedPeople === 0;
@@ -324,7 +313,7 @@ function PartyRoomView({ code, initialTab }) {
 
     // notifica locale quando un mio ordine cambia stato: non c'è push
     // cross-dispositivo, ma se la scheda è aperta l'aggiornamento arriva
-    // da onSnapshot e tanto basta
+    // da onSnapshot 
     const seenStatuses = useRef(new Map());
 
     useEffect(() => {
@@ -349,9 +338,8 @@ function PartyRoomView({ code, initialTab }) {
         });
     }, [myOrders]);
 
-    // notifica locale all'host quando arriva un ordine nuovo di zecca:
-    // guardo solo gli id mai visti prima, sennò un ordine che passa da
-    // "in coda" ad altro stato riattiverebbe la notifica
+    // notifica locale all'host quando arriva un ordine:
+    // guardo solo gli id mai visti prima 
     const knownOrderIds = useRef(new Set());
     const orderIdsInitialized = useRef(false);
 
@@ -376,9 +364,6 @@ function PartyRoomView({ code, initialTab }) {
         orderIdsInitialized.current = true;
     }, [orders, isHost]);
 
-    // le schede cambiano quando l'host mi promuove a bar: invece di
-    // reimpostarle a mano ricado sulla prima valida, così il passaggio
-    // da cliente a bar non mi lascia su una scheda che non esiste più
     const isDraft = party?.started === false;
     const isStopped = party?.active === false;
     const barTabs = isDraft ? BAR_TABS_DRAFT : isStopped ? BAR_TABS_STOPPED : BAR_TABS_LIVE;
@@ -469,9 +454,6 @@ function PartyRoomView({ code, initialTab }) {
         }
     };
 
-    // spuntare una riga della spesa è una modifica del bancone come le
-    // altre: passa dallo stesso salvataggio in transazione, così non
-    // scavalca quello che un altro bar sta facendo nel frattempo
     const handleToggleBought = (row, bought) =>
         handleSaveInventory({
             base: inventory,
@@ -510,13 +492,6 @@ function PartyRoomView({ code, initialTab }) {
             refreshPartyList();
         });
 
-    // Il numero di invitati è una decisione dell'host e resta quello che
-    // ha scritto: non lo tocca la scorta del bancone (gli ingredienti che
-    // non bastano si comprano, non si invitano meno persone) e non lo
-    // riporta indietro un salvataggio andato storto. Vive qui e non nella
-    // scheda Spesa perché l'attesa prima di scrivere sul server sopravvive
-    // al cambio scheda: sennò chi scrive "30" e salta subito al bancone a
-    // vedere cosa manca perderebbe il numero appena messo.
     const savePeople = useCallback(
         (next) => {
             setPeopleDraft(next);

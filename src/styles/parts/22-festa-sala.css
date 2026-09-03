@@ -1,0 +1,263 @@
+/* =========================================================
+   22. FESTA — SALA (schede, menù, ordini, bancone, persone)
+========================================================= */
+
+/* Cosa trovi qui:
+   La stanza della festa (pages/PartyRoom.jsx): quello che vedi dopo
+   essere entrato con il codice.
+
+   .party-tabs / .party-tab   le schede in alto, una per postazione:
+                              Coda, Menu, Prepara, Bancone, Spesa,
+                              Persone. Ognuna col suo colore
+   .party-tab-count           il numerino dentro la scheda
+
+   Le quattro liste, tutte con la stessa riga a due colonne:
+   .menu-list         i drink del menu   (PartyMenu.jsx)
+   .order-list        gli ordini in coda (PartyOrderQueue.jsx)
+   .stock-list        cosa c'e' da bere  (PartyInventoryEditor.jsx)
+   .participant-list  chi c'e' alla festa (PartyParticipants.jsx)
+
+   Le schede Prepara e Spesa stanno in 23-festa-prepara-spesa.css.
+*/
+
+.party-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--rule);
+}
+
+/* ogni scheda ha il suo colore in --tab-accent, diverso dai colori dei
+   pulsanti: serve a riconoscerla nella fila, non e' un'azione */
+.party-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.05rem;
+    border: 1.5px solid var(--rule-2);
+    border-radius: var(--radius-pill);
+    color: var(--ink-2);
+    background: var(--paper);
+    transition: background-color 0.18s var(--ease),
+                border-color 0.18s var(--ease),
+                color 0.18s var(--ease),
+                transform 0.18s var(--ease);
+}
+
+.party-tab svg {
+    color: var(--tab-accent, var(--ink-3));
+    flex-shrink: 0;
+    transition: color 0.18s var(--ease);
+}
+
+.party-tab:hover {
+    border-color: var(--tab-accent, var(--ink-3));
+    color: var(--ink);
+    transform: translateY(-1px);
+}
+
+.party-tab.is-active {
+    background: var(--tab-accent, var(--ink));
+    border-color: var(--tab-accent, var(--ink));
+    color: #fff;
+}
+
+.party-tab.is-active svg {
+    color: #fff;
+}
+
+/* un colore per scheda: tinge testo e bordo, e diventa lo sfondo
+   quando la scheda e' quella aperta */
+.party-tab--coda { --tab-accent: var(--tab-coda); }
+.party-tab--prepara { --tab-accent: var(--bitter); }
+.party-tab--bancone { --tab-accent: var(--tab-bancone); }
+.party-tab--persone { --tab-accent: var(--tab-persone); }
+.party-tab--spesa { --tab-accent: var(--tab-spesa); }
+
+.party-tab-count {
+    display: grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding-inline: 0.3rem;
+    border-radius: var(--radius-pill);
+    background: var(--tab-coda);
+    color: #fff;
+    font-size: 0.62rem;
+}
+
+.party-tab.is-active .party-tab-count {
+    background: #fff;
+    color: var(--tab-coda-dark);
+}
+
+/* Menù e ordini condividono la stessa riga a due colonne */
+.menu-list,
+.order-list,
+.stock-list,
+.participant-list {
+    list-style: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.menu-item,
+.order,
+.stock,
+.participant {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    padding: 0.9rem 1.1rem;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+}
+
+.menu-item:last-child,
+.order:last-child,
+.stock:last-child,
+.participant:last-child {
+    border-bottom: none;
+}
+
+.menu-item-text,
+.order-text,
+.participant-text {
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.menu-item-name,
+.order-drink,
+.participant-name,
+.stock-name {
+    display: block;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+a.menu-item-name,
+a.order-drink {
+    width: fit-content;
+}
+
+a.menu-item-name:hover,
+a.menu-item-name:focus-visible,
+a.order-drink:hover,
+a.order-drink:focus-visible {
+    text-decoration: underline;
+}
+
+.stock-name {
+    flex: 1 1 10rem;
+}
+
+.menu-item-ingredients,
+.order-meta,
+.participant-meta {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 0.3rem;
+    line-height: 1.5;
+}
+
+.menu-list-muted,
+.order-list-muted {
+    opacity: 0.65;
+}
+
+.ingredient-missing {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+/* gli interruttori su ogni drink del menu (disponibile / non disponibile) */
+.menu-toggles {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.menu-unavailable {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+/* i pulsanti del bancone su un ordine: in preparazione, pronto, annulla */
+.order-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-left: auto;
+}
+
+/* la pastiglia di stato dell'ordine, un colore per stato */
+.order-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    white-space: nowrap;
+}
+
+.order-status .status-dot {
+    background: currentColor;
+}
+
+.order-status-preparing {
+    color: var(--ink);
+}
+
+.order-status-ready {
+    color: var(--bitter);
+}
+
+.order-status-cancelled {
+    text-decoration: line-through;
+}
+
+/* il separatore sopra gli ordini gia' chiusi */
+.order-history-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 2rem;
+}
+
+.order-history-title {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.stock.is-empty .stock-name {
+    color: var(--ink-3);
+    text-decoration: line-through;
+}
+
+.party-inventory .ingredient-section:first-of-type {
+    border-top: none;
+}
+

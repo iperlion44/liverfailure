@@ -81,8 +81,7 @@ function DrinkCard({
                             disabled={favoriteAction.pending}
                             title={favoriteAction.active ? "Rimuovi dai preferiti" : "Aggiungi ai preferiti"}
                             onClick={(event) => {
-                                // la card è spesso dentro un <Link>: senza fermare
-                                // l'evento qui il click aprirebbe anche il dettaglio
+
                                 event.preventDefault();
                                 event.stopPropagation();
                                 favoriteAction.onToggle();
@@ -99,8 +98,7 @@ function DrinkCard({
                             aria-haspopup="dialog"
                             title={partyAction.active ? "Già in una festa aperta — gestisci" : "Aggiungi a una festa"}
                             onClick={(event) => {
-                                // la card è spesso dentro un <Link>: senza fermare
-                                // l'evento qui il click aprirebbe anche il dettaglio
+                                
                                 event.preventDefault();
                                 event.stopPropagation();
                                 partyAction.onOpen();
@@ -175,8 +173,4 @@ function DrinkCard({
     );
 }
 
-// le foto sono data URL grosse dentro alla prop drink, quindi senza
-// memo ogni carattere digitato nella ricerca fa ricontrollare tutte
-// quelle stringhe. gli oggetti drink non cambiano riferimento se non
-// cambiano davvero, quindi il memo funziona bene qui
 export default memo(DrinkCard);
