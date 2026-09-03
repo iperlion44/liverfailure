@@ -26,8 +26,9 @@ function IngredientSummary({ drink, owned }) {
     );
 }
 
-// la fase di preparazione: i drink si scelgono da Esplora (come i
-// preferiti, ma per la festa), qui si vede la lista già salvata, cosa
+// la fase di preparazione: i drink si scelgono da Esplora o dai propri
+// (come i preferiti, ma per la festa; anche i privati, che alla festa
+// diventano visibili a tutti), qui si vede la lista già salvata, cosa
 // manca rispetto alla propria dispensa, e si avvia la festa quando è
 // pronta. Resta utile anche a festa già iniziata, per togliere un drink
 // al volo o tenere d'occhio la lista della spesa
@@ -64,10 +65,16 @@ function PartyPlanner({
                     <h2 className="recipe-block-title">La lista della festa</h2>
 
                     {selectedDrinks.length > 0 && (
-                        <Link to="/explore" className="btn btn-primary">
-                            <IconPlus />
-                            Aggiungi drink
-                        </Link>
+                        <div className="party-planner-add">
+                            <Link to="/explore" className="btn btn-primary">
+                                <IconPlus />
+                                Aggiungi drink
+                            </Link>
+
+                            <Link to="/my-drinks" className="btn btn-outline">
+                                Dai miei drink
+                            </Link>
+                        </div>
                     )}
                 </div>
 
@@ -76,6 +83,13 @@ function PartyPlanner({
                         <Link to="/explore" className="btn btn-primary btn-hero">
                             <IconPlus />
                             Scegli da Esplora
+                        </Link>
+
+                        {/* anche una ricetta privata si può mettere nel
+                            menù: alla festa la vedono tutti, in Esplora
+                            resta invisibile come prima */}
+                        <Link to="/my-drinks" className="btn btn-outline">
+                            Oppure metti un tuo drink
                         </Link>
                     </EmptyState>
                 ) : (
@@ -104,8 +118,8 @@ function PartyPlanner({
                             <li className="menu-item">
                                 <span className="menu-item-text">
                                     {missingFromCatalog === 1
-                                        ? "1 drink della lista non è più nella libreria pubblica."
-                                        : `${missingFromCatalog} drink della lista non sono più nella libreria pubblica.`}
+                                        ? "1 drink della lista non è più disponibile."
+                                        : `${missingFromCatalog} drink della lista non sono più disponibili.`}
                                 </span>
                             </li>
                         )}

@@ -86,32 +86,39 @@ function Favorites() {
                     collection(db, "users", user.uid, "favorites")
                 );
 
+                // chi può ancora leggere il drink lo dicono le regole:
+                // un privato salvato dal menù di una festa resta nei
+                // preferiti finché sono dentro quella festa, e sparisce
+                // da solo quando il permesso non c'è più
                 const results = await Promise.all(
                     favoritesSnapshot.docs.map(async (favorite) => {
-                        const drinkSnapshot = await getDoc(doc(db, "drinks", favorite.id));
+                        try {
+                            const drinkSnapshot = await getDoc(doc(db, "drinks", favorite.id));
 
-                        if (!drinkSnapshot.exists()) {
+                            return {
+                                id: favorite.id,
+                                drink: drinkSnapshot.exists()
+                                    ? { id: drinkSnapshot.id, ...drinkSnapshot.data() }
+                                    : null
+                            };
+                        } catch (readError) {
+                            // "non lo puoi più leggere" è un preferito da
+                            // ripulire; un problema di rete invece deve
+                            // far cadere tutta la lista sulla copia
+                            // locale, non cancellare i preferiti
+                            if (readError?.code !== "permission-denied") {
+                                throw readError;
+                            }
+
                             return { id: favorite.id, drink: null };
                         }
-
-                        const data = drinkSnapshot.data();
-                        const isOwnerOfDrink = data.authorId === user.uid;
-
-                        if (data.isPublic === false && !isOwnerOfDrink) {
-                            return { id: favorite.id, drink: null };
-                        }
-
-                        return {
-                            id: favorite.id,
-                            drink: { id: drinkSnapshot.id, ...data }
-                        };
                     })
                 );
 
                 const validDrinks = results.filter((result) => result.drink).map((result) => result.drink);
 
-                // se il drink è stato cancellato o messo privato da chi
-                // non è l'autore, il riferimento nei preferiti resta
+                // se il drink è stato cancellato, o messo privato da chi
+                // l'ha scritto, il riferimento nei preferiti resta
                 // "orfano": lo tolgo sia da firestore che dalla cache
                 const staleIds = results.filter((result) => !result.drink).map((result) => result.id);
 

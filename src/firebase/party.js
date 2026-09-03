@@ -364,6 +364,44 @@ export async function setPartyMenu({ code, drinkIds }) {
     await updateDoc(partyRef(code), { menuDrinkIds: cleaned, updatedAt: serverTimestamp() });
 }
 
+// un drink privato non compare in Esplora, ma se lo metto nel menù di
+// una festa i clienti devono poterlo aprire come gli altri: sul
+// documento del drink tengo i codici delle feste in cui l'ho messo, e le
+// regole lasciano leggere la ricetta a chi è dentro una di quelle.
+// Il limite è lo stesso delle regole, che i codici li controllano uno a
+// uno: le feste più recenti vincono, le vecchie escono dalla lista
+export const MAX_DRINK_PARTY_CODES = 8;
+
+export async function setDrinkPartyCodes({ drinkId, codes }) {
+    if (!drinkId) {
+        throw new PartyError("Drink non valido.");
+    }
+
+    const cleaned = [
+        ...new Set((codes ?? []).map((code) => normalizePartyCode(code)).filter(Boolean))
+    ].slice(0, MAX_DRINK_PARTY_CODES);
+
+    await updateDoc(doc(db, "drinks", drinkId), { partyCodes: cleaned });
+}
+
+// le ricette del menù che la query pubblica non ha portato: sono i drink
+// privati condivisi nella festa. Vanno lette una a una (la query su
+// isPublic non le prende) e chi non ha il permesso semplicemente non le
+// vede, senza far cadere tutto il menù
+export async function fetchDrinksByIds(ids) {
+    const wanted = [...new Set((ids ?? []).filter((id) => typeof id === "string" && id))];
+
+    const results = await Promise.all(
+        wanted.map((id) =>
+            getDoc(doc(db, "drinks", id))
+                .then((snapshot) => (snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null))
+                .catch(() => null)
+        )
+    );
+
+    return results.filter(Boolean);
+}
+
 // la stima degli invitati si corregge dalla scheda "Spesa": cambia solo
 // quante bottiglie comprare, non tocca né il menù né il bancone
 export async function setPartyPeople({ code, people }) {

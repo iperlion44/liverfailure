@@ -13,6 +13,7 @@ import {
     cancelOrder,
     clearOrderHistory,
     deleteParty,
+    fetchDrinksByIds,
     joinParty,
     participantRef,
     placeOrder,
@@ -72,6 +73,19 @@ const BAR_TABS_STOPPED = [TAB_CODA, TAB_MENU, TAB_PREPARA, TAB_BANCONE, TAB_SPES
 // fermi prima di scrivere il numero sulla festa
 const PEOPLE_SAVE_DEBOUNCE_MS = 600;
 
+// del drink alla festa servono il nome e la ricetta; isPublic e authorId
+// li tengo dietro perché è l'host, e solo sui propri drink privati, a
+// dover aggiornare le feste in cui il drink è visibile
+function toCatalogEntry(id, data) {
+    return {
+        id,
+        name: data.name ?? "Senza nome",
+        ingredients: normalizeIngredients(data.ingredients),
+        isPublic: data.isPublic !== false,
+        authorId: data.authorId ?? ""
+    };
+}
+
 const CUSTOMER_TABS = [
     { id: "menu", label: "Menù", icon: IconGlass },
     { id: "miei", label: "I miei ordini" }
@@ -80,7 +94,7 @@ const CUSTOMER_TABS = [
 function PartyRoomView({ code, initialTab }) {
     const { user } = useAuth();
     const { inventory: pantry } = useInventory();
-    const { refresh: refreshPartyList } = usePartyList();
+    const { refresh: refreshPartyList, syncDrinkParties } = usePartyList();
     const navigate = useNavigate();
 
     const [party, setParty] = useState(undefined);
@@ -88,7 +102,9 @@ function PartyRoomView({ code, initialTab }) {
     const [participants, setParticipants] = useState([]);
     const [orders, setOrders] = useState([]);
     const [inventory, setInventory] = useState(emptyPartyInventory());
-    const [catalog, setCatalog] = useState([]);
+    const [publicDrinks, setPublicDrinks] = useState([]);
+    const [publicDrinksLoaded, setPublicDrinksLoaded] = useState(false);
+    const [partyOnlyDrinks, setPartyOnlyDrinks] = useState([]);
 
     const [tab, setTab] = useState(initialTab || "");
     const [busyId, setBusyId] = useState("");
@@ -170,15 +186,8 @@ function PartyRoomView({ code, initialTab }) {
                     return;
                 }
 
-                setCatalog(
-                    snapshot.docs
-                        .map((document) => ({
-                            id: document.id,
-                            name: document.data().name ?? "Senza nome",
-                            ingredients: normalizeIngredients(document.data().ingredients)
-                        }))
-                        .sort((first, second) => first.name.localeCompare(second.name, "it"))
-                );
+                setPublicDrinks(snapshot.docs.map((document) => toCatalogEntry(document.id, document.data())));
+                setPublicDrinksLoaded(true);
             })
             .catch((error) => console.error(error));
 
@@ -186,6 +195,81 @@ function PartyRoomView({ code, initialTab }) {
             cancelled = true;
         };
     }, [isParticipant]);
+
+    // la lista dei codici cambia identità a ogni snapshot anche quando
+    // dentro c'è la stessa roba: la riduco a una stringa, sennò l'effetto
+    // qui sotto ripartirebbe a ogni respiro della festa
+    const menuIdsKey = Array.isArray(party?.menuDrinkIds) ? party.menuDrinkIds.join(",") : "";
+    const publicIdsKey = useMemo(
+        () => publicDrinks.map((drink) => drink.id).join(","),
+        [publicDrinks]
+    );
+
+    // i drink privati che l'host ha messo nel menù la query qui sopra non
+    // li porta (restano fuori da Esplora anche adesso): sono quelli del
+    // menù che non trovo tra i pubblici e vado a leggerli uno a uno, così
+    // alla festa si ordinano e si aprono come tutti gli altri.
+    // Aspetto che i pubblici siano arrivati, sennò al primo giro sarebbe
+    // tutto il menù a sembrare privato
+    useEffect(() => {
+        if (!isParticipant || !publicDrinksLoaded) {
+            return undefined;
+        }
+
+        const known = new Set(publicIdsKey ? publicIdsKey.split(",") : []);
+        const onlyInParty = (menuIdsKey ? menuIdsKey.split(",") : []).filter((id) => !known.has(id));
+
+        if (onlyInParty.length === 0) {
+            return undefined;
+        }
+
+        let cancelled = false;
+
+        fetchDrinksByIds(onlyInParty)
+            .then((drinks) => {
+                if (cancelled) {
+                    return;
+                }
+
+                setPartyOnlyDrinks(drinks.map((drink) => toCatalogEntry(drink.id, drink)));
+
+                // i miei drink privati li leggo comunque, anche se sul
+                // documento manca il codice di questa festa: ma agli
+                // ospiti servirebbe. Capita alle feste messe insieme
+                // prima che i privati potessero entrare nel menù, o se
+                // la scrittura di allora era andata storta: rimetto a
+                // posto il permesso adesso che me ne accorgo
+                drinks
+                    .filter(
+                        (drink) =>
+                            drink.isPublic === false &&
+                            drink.authorId === user?.uid &&
+                            !(Array.isArray(drink.partyCodes) ? drink.partyCodes : []).includes(code)
+                    )
+                    .forEach((drink) => syncDrinkParties({ drink, partyId: code, included: true }));
+            })
+            .catch((error) => console.error(error));
+
+        return () => {
+            cancelled = true;
+        };
+    }, [isParticipant, publicDrinksLoaded, publicIdsKey, menuIdsKey, code, user, syncDrinkParties]);
+
+    // quello che ho letto a parte vale solo finché è davvero un drink in
+    // più del menù: se l'host lo toglie, o se nel frattempo è diventato
+    // pubblico, esce di qui senza bisogno di riandare a leggerlo
+    const catalog = useMemo(() => {
+        const inMenu = new Set(menuIdsKey ? menuIdsKey.split(",") : []);
+        const alreadyPublic = new Set(publicDrinks.map((drink) => drink.id));
+
+        const extras = partyOnlyDrinks.filter(
+            (drink) => inMenu.has(drink.id) && !alreadyPublic.has(drink.id)
+        );
+
+        return [...publicDrinks, ...extras].sort((first, second) =>
+            first.name.localeCompare(second.name, "it")
+        );
+    }, [publicDrinks, partyOnlyDrinks, menuIdsKey]);
 
     useEffect(() => {
         if (party && isParticipant && user) {
@@ -422,6 +506,7 @@ function PartyRoomView({ code, initialTab }) {
             const next = included ? [...current, drink.id] : current.filter((id) => id !== drink.id);
 
             await setPartyMenu({ code, drinkIds: next });
+            await syncDrinkParties({ drink, partyId: code, included });
             refreshPartyList();
         });
 

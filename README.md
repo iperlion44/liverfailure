@@ -62,6 +62,7 @@ guardare il codice corrispondente.
 - "Consigliati per te" in home: drink pubblici scelti in base agli ingredienti dei tuoi preferiti
 - Dispensa personale (`/inventory`): segni cosa hai in casa e ogni drink ti dice se lo puoi fare ora o cosa ti manca, con lista della spesa scalabile per N persone
 - Modalità festa (`/party`): uno fa da bar, gli altri ordinano dal telefono, con coda ordini in tempo reale e inventario condiviso che si scala da solo
+- Nel menù della festa ci puoi mettere anche una tua ricetta privata: alla festa la vedono, la aprono e la ordinano tutti come le altre, ma in Esplora resta invisibile. Il permesso vale finché il drink è in quel menù e tu sei in quella festa
 - Scheda "Spesa" (solo a festa ferma): dato il menù scelto e le persone attese, dice quanto serve di ogni ingrediente perché ognuno possa ordinare almeno una volta ogni drink, già al netto di quello che c'è sul bancone. Si spunta come una lista della spesa vera — la riga presa si barra e resta al suo posto, e finisce sul bancone con la quantità che serve
 - Profilo utente con foto e password modificabili
 - PWA installabile e utilizzabile offline (manifest, service worker, dati in cache locale)
@@ -74,7 +75,7 @@ Tutta l'interfaccia è in italiano; è una scelta di prodotto, non un dettaglio 
 
 | Collection | Cosa contiene | Chi scrive |
 | --- | --- | --- |
-| `drinks/{id}` | La ricetta | L'autore |
+| `drinks/{id}` | La ricetta; `partyCodes` elenca le feste in cui l'autore ha messo un drink privato | L'autore |
 | `drinks/{id}/reviews/{uid}` | Voto 1-5 e commento; l'id documento è l'uid, quindi una recensione a testa | Chi recensisce (mai l'autore del drink) |
 | `drinkRatings/{drinkId}` | `ratingTotal` (somma dei voti) e `ratingCount` | Chiunque recensisca, ma solo in transazione insieme alla propria recensione |
 | `users/{uid}` | Foto profilo e `inventory` (la dispensa) | Il proprietario |
@@ -112,4 +113,14 @@ Gli indici nuovi servono per le feste che ho aperto io (`partySessions` su `host
 
 ## Utilizzo dell'AI
 
-- 
+Nello sviluppo del progetto è stato usato un assistente AI (Claude Code) come supporto per:
+
+- Revisione di codice (componenti React, pagine, logica applicativa e utility)
+- Configurazione di strumenti e servizi (Firebase, PWA, build/deploy)
+- Debug e correzione di problemi riscontrati durante lo sviluppo
+- Stesura e revisione della documentazione (questo README incluso)
+
+La scrittura del codice che riguarda lo stile dell webapp (CSS) è basata sulla scrittura della pagina home
+creata dall'utente e poi lo stesso stile è stato riutilizzato come base dall'assistente AI per le altre pagine
+
+Le scelte di prodotto, l'architettura generale e le decisioni finali restano comunque a cura dello sviluppatore.

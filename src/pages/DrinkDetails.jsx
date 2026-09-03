@@ -111,14 +111,14 @@ function DrinkDetailsView({ id }) {
                     return;
                 }
 
+                // chi può leggere il drink lo decidono le regole di
+                // firestore: pubblico per tutti, privato per l'autore e
+                // per chi è in una festa che ce l'ha nel menù. Se la
+                // lettura è arrivata fin qui la ricetta si può mostrare;
+                // sennò getDoc ha già sollevato e siamo nel catch
                 if (snapshot.exists()) {
-                    const data = snapshot.data();
-                    const isOwnerOfDrink = user && data.authorId === user.uid;
-
-                    if (data.isPublic !== false || isOwnerOfDrink) {
-                        setDrink({ id: snapshot.id, ...data });
-                        setIsCached(false);
-                    }
+                    setDrink({ id: snapshot.id, ...snapshot.data() });
+                    setIsCached(false);
                 }
             } catch (error) {
                 console.error(error);
@@ -410,7 +410,9 @@ function DrinkDetailsView({ id }) {
                     </Link>
                 )}
 
-                {user && (
+                {/* una ricetta privata la mette nel menù solo chi l'ha
+                    scritta: agli altri la festa l'ha già messa davanti */}
+                {user && (drink.isPublic !== false || isOwner) && (
                     <button
                         type="button"
                         className="btn btn-outline"
@@ -431,12 +433,17 @@ function DrinkDetailsView({ id }) {
 
             <PantryPanel ingredients={ingredients} />
 
-            <ReviewSection
-                drinkId={drink.id}
-                isAuthor={Boolean(isOwner)}
-                rating={rating}
-                onRatingChange={setRating}
-            />
+            {/* le recensioni di un drink privato restano cosa
+                dell'autore: chi lo apre dal menù della festa legge la
+                ricetta, non i voti degli altri */}
+            {(drink.isPublic !== false || isOwner) && (
+                <ReviewSection
+                    drinkId={drink.id}
+                    isAuthor={Boolean(isOwner)}
+                    rating={rating}
+                    onRatingChange={setRating}
+                />
+            )}
 
             {party.pickerDrink && (
                 <PartyPickerModal

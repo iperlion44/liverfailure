@@ -7,6 +7,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import db from "../firebase/firestore";
 
 import { useAuth } from "../context/useAuth";
+import { usePartyList } from "../context/usePartyList";
+import { MAX_DRINK_PARTY_CODES } from "../firebase/party";
 import { Loader } from "../components/Loader";
 import EmptyState from "../components/EmptyState";
 import {
@@ -24,6 +26,7 @@ function EditDrink() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { openParties, loading: partiesLoading } = usePartyList();
 
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
@@ -210,13 +213,28 @@ function EditDrink() {
         try {
             setSaving(true);
 
+            // se qui la ricetta diventa privata, chi è alla festa deve
+            // continuare a vederla: riscrivo i codici delle feste aperte
+            // che ce l'hanno nel menù, gli stessi che le regole
+            // controllano per lasciar leggere un drink privato.
+            // Se le feste non sono ancora arrivate lascio stare quello
+            // che c'è: azzerare la lista qui vorrebbe dire far sparire il
+            // drink dal menù di una festa in corso
+            const partyCodes = partiesLoading
+                ? null
+                : openParties
+                      .filter((party) => Array.isArray(party.menuDrinkIds) && party.menuDrinkIds.includes(id))
+                      .map((party) => party.id)
+                      .slice(0, MAX_DRINK_PARTY_CODES);
+
             await updateDoc(doc(db, "drinks", id), {
                 name: trimmedName,
                 description: description.trim(),
                 ingredients: cleanIngredients,
                 preparation: trimmedPreparation,
                 isPublic,
-                image: imageData
+                image: imageData,
+                ...(partyCodes ? { partyCodes } : {})
             });
 
             navigate("/my-drinks");

@@ -59,13 +59,13 @@ function Navbar() {
 
                         {user && (
                             <>
-                                <NavLink to="/inventory" className={linkClass}>
-                                    <span className="nav-link-icon"><IconBottle /></span>
-                                    Dispensa
-                                </NavLink>
                                 <NavLink to="/party" className={linkClass}>
                                     <span className="nav-link-icon"><IconParty /></span>
                                     Festa
+                                </NavLink>
+                                <NavLink to="/inventory" className={linkClass}>
+                                    <span className="nav-link-icon"><IconBottle /></span>
+                                    Dispensa
                                 </NavLink>
                                 <NavLink to="/my-drinks" className={linkClass}>
                                     <span className="nav-link-icon"><IconGlass /></span>
@@ -147,13 +147,17 @@ function Navbar() {
 
                 {user ? (
                     <>
+                        {/* Festa sta al centro perche' e' la voce che regge
+                            l'uso vero dell'app: telefono in mano, in piedi,
+                            serata gia' cominciata. Centro = pollice, e il
+                            bollo rosso la fa trovare senza cercarla. */}
+                        <NavLink to="/party" className={({ isActive }) => `${tabClass({ isActive })} tab-link-key`}>
+                            <span className="tab-link-icon"><IconParty /></span>
+                            <span className="tab-link-label">Festa</span>
+                        </NavLink>
                         <NavLink to="/inventory" className={tabClass}>
                             <span className="tab-link-icon"><IconBottle /></span>
                             <span className="tab-link-label">Dispensa</span>
-                        </NavLink>
-                        <NavLink to="/party" className={tabClass}>
-                            <span className="tab-link-icon"><IconParty /></span>
-                            <span className="tab-link-label">Festa</span>
                         </NavLink>
                         <NavLink to="/profile" className={tabClass}>
                             <span className="tab-link-icon"><IconUser /></span>

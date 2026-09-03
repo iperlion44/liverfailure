@@ -29,12 +29,45 @@ service cloud.firestore {
         && data.preparation is string && data.preparation.size() > 0
         && data.ingredients is list && data.ingredients.size() > 0
         && data.isPublic is bool
-        && (!('description' in data) || (data.description is string && data.description.size() <= 300));
+        && (!('description' in data) || (data.description is string && data.description.size() <= 300))
+        && (!('partyCodes' in data) || (data.partyCodes is list && data.partyCodes.size() <= 8));
+    }
+
+    function inPartyRoom(code) {
+      return exists(/databases/$(database)/documents/partySessions/$(code)/participants/$(request.auth.uid));
+    }
+
+    // un drink privato messo nel menu' di una festa resta fuori da
+    // Esplora, ma chi e' dentro quella festa deve poterne leggere la
+    // ricetta come per tutti gli altri drink del menu'. Sul documento
+    // l'autore tiene i codici delle feste in cui l'ha messo: qui
+    // controllo di essere partecipante di almeno una di quelle.
+    // Le regole non hanno cicli, quindi srotolo i codici uno per uno:
+    // sono al massimo 8 (stesso limite di isValidDrink) e l'|| si ferma
+    // al primo che va a segno, quindi di solito e' una lettura sola
+    function isSharedInMyParty(data) {
+      return isSignedIn()
+        && 'partyCodes' in data
+        && data.partyCodes is list
+        && ((data.partyCodes.size() > 0 && inPartyRoom(data.partyCodes[0]))
+          || (data.partyCodes.size() > 1 && inPartyRoom(data.partyCodes[1]))
+          || (data.partyCodes.size() > 2 && inPartyRoom(data.partyCodes[2]))
+          || (data.partyCodes.size() > 3 && inPartyRoom(data.partyCodes[3]))
+          || (data.partyCodes.size() > 4 && inPartyRoom(data.partyCodes[4]))
+          || (data.partyCodes.size() > 5 && inPartyRoom(data.partyCodes[5]))
+          || (data.partyCodes.size() > 6 && inPartyRoom(data.partyCodes[6]))
+          || (data.partyCodes.size() > 7 && inPartyRoom(data.partyCodes[7])));
     }
 
     match /drinks/{drinkId} {
-      // Pubblico se marcato tale, altrimenti visibile solo a chi l'ha scritto.
-      allow read: if resource.data.isPublic == true || isOwner(resource.data.authorId);
+      // Pubblico se marcato tale, altrimenti visibile a chi l'ha scritto
+      // e a chi e' dentro una festa che ce l'ha nel menu'. Esplora
+      // interroga solo isPublic == true, quindi un drink privato non
+      // finisce comunque mai nella libreria: si apre dal menu' della
+      // festa o dal link diretto alla ricetta
+      allow read: if resource.data.isPublic == true
+        || isOwner(resource.data.authorId)
+        || isSharedInMyParty(resource.data);
 
       allow create: if isSignedIn()
         && request.resource.data.authorId == request.auth.uid

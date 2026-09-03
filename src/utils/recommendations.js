@@ -2,19 +2,15 @@ import { normalizeIngredients } from "./drink.js";
 import { isAlcoholic, isExtra } from "./spirits.js";
 import { RATING_MAX, RATING_MIN, bayesianRating } from "./rating.js";
 
-// due drink si somigliano soprattutto per la base alcolica: avere in
-// comune il gin conta molto più di avere in comune il ghiaccio
+// due drink si somigliano per cosa ci si beve dentro: gli extra
+// (ghiaccio, scorze, cannucce...) non contano, altrimenti due drink
+// diversi risulterebbero "simili" solo perché hanno entrambi il ghiaccio
 export const ALCOHOLIC_WEIGHT = 3;
 export const NON_ALCOHOLIC_WEIGHT = 2;
-export const EXTRA_WEIGHT = 1;
 
 export function ingredientWeight(name) {
     if (isAlcoholic(name)) {
         return ALCOHOLIC_WEIGHT;
-    }
-
-    if (isExtra(name)) {
-        return EXTRA_WEIGHT;
     }
 
     return NON_ALCOHOLIC_WEIGHT;
@@ -36,7 +32,8 @@ function uniqueIngredientNames(rawIngredients) {
     const seen = new Set();
 
     normalizeIngredients(rawIngredients).forEach(({ name }) => {
-        if (!name || seen.has(name)) {
+        // gli extra non contribuiscono alla somiglianza tra drink
+        if (!name || seen.has(name) || isExtra(name)) {
             return;
         }
 

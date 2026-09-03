@@ -45,15 +45,14 @@ const espressoMartini = {
 test("ingredientWeight pesa di più gli alcolici", () => {
     assert.equal(ingredientWeight("Gin"), 3);
     assert.equal(ingredientWeight("Acqua tonica"), 2);
-    assert.equal(ingredientWeight("Ghiaccio"), 1);
 });
 
-test("buildTasteProfile somma i pesi degli ingredienti dei preferiti", () => {
+test("buildTasteProfile somma i pesi degli ingredienti dei preferiti e ignora gli extra", () => {
     const profile = buildTasteProfile([negroni, ginTonic]);
 
     assert.equal(profile.get("Gin"), 6);
     assert.equal(profile.get("Campari"), 3);
-    assert.equal(profile.get("Spicchio di lime"), 1);
+    assert.equal(profile.has("Spicchio di lime"), false);
     assert.equal(profile.has("Vodka"), false);
 });
 
@@ -84,6 +83,21 @@ test("sharedIngredients elenca solo quello che è già nei preferiti", () => {
     const profile = buildTasteProfile([negroni]);
 
     assert.deepEqual(sharedIngredients(ginTonic, profile), ["Gin"]);
+});
+
+test("un drink simile solo per un extra non conta come simile", () => {
+    const profile = buildTasteProfile([negroni]);
+
+    const soloGhiaccio = {
+        id: "solo-ghiaccio",
+        ingredients: [
+            { name: "Vodka", quantity: "50 ml" },
+            { name: "Ghiaccio", quantity: "1" }
+        ]
+    };
+
+    assert.deepEqual(sharedIngredients(soloGhiaccio, profile), []);
+    assert.equal(similarityScore(soloGhiaccio, profile), 0);
 });
 
 test("recommendDrinks esclude preferiti, drink miei e roba senza attinenza", () => {

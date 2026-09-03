@@ -4,6 +4,7 @@ import {
     PARTY_NAME_MAX_LENGTH,
     createParty,
     listMyParties,
+    setDrinkPartyCodes,
     setPartyMenu,
     subscribeQueuedOrders,
     syncPartyInventoryFromPantry
@@ -128,6 +129,43 @@ export function PartyListProvider({ children }) {
         [queuedOrderParties]
     );
 
+    // un drink privato lo vedo solo io: perché lo veda anche chi è alla
+    // festa, sul suo documento scrivo i codici delle feste aperte che ce
+    // l'hanno nel menù. Ricalcolo sempre la lista intera invece di
+    // aggiungere e togliere un codice alla volta, così le feste chiuse o
+    // cancellate escono da sole senza doverci pensare.
+    // Vale solo per i miei drink privati: quelli pubblici li leggono già
+    // tutti, e sul drink di un altro non ho il permesso di scrivere
+    const syncDrinkParties = useCallback(
+        async ({ drink, partyId, included }) => {
+            if (!user || !drink?.id || drink.isPublic !== false || drink.authorId !== user.uid) {
+                return;
+            }
+
+            const others = parties
+                .filter((party) => party.id !== partyId && party.active !== false)
+                .filter((party) => Array.isArray(party.menuDrinkIds) && party.menuDrinkIds.includes(drink.id))
+                .map((party) => party.id);
+
+            // la festa che sto toccando va in testa: se i codici sono più
+            // di quanti ne accettano le regole, la lista viene tagliata in
+            // fondo e quella appena scelta non deve essere la prima a saltare
+            const codes = included ? [partyId, ...others] : others;
+
+            try {
+                await setDrinkPartyCodes({ drinkId: drink.id, codes });
+            } catch (syncError) {
+                console.error(syncError);
+                setError(
+                    included
+                        ? "Il drink è nel menù, ma i clienti della festa non riescono ancora a vederlo. Riprova."
+                        : "Il drink è fuori dal menù, ma resta visibile ai clienti della festa. Riprova."
+                );
+            }
+        },
+        [user, parties]
+    );
+
     const toggleDrinkInParty = useCallback(
         async ({ drink, partyId }) => {
             if (!user || !drink?.id || !partyId) {
@@ -149,6 +187,7 @@ export function PartyListProvider({ children }) {
                 const next = included ? current.filter((id) => id !== drink.id) : [...current, drink.id];
 
                 await setPartyMenu({ code: partyId, drinkIds: next });
+                await syncDrinkParties({ drink, partyId, included: !included });
 
                 setParties((currentParties) =>
                     currentParties.map((party) =>
@@ -166,7 +205,7 @@ export function PartyListProvider({ children }) {
                 setPendingPartyId("");
             }
         },
-        [user, parties]
+        [user, parties, syncDrinkParties]
     );
 
     // creata apposta dal selettore di Esplora: la festa nasce già con
@@ -185,6 +224,7 @@ export function PartyListProvider({ children }) {
                 const code = await createParty({ user, name: trimmedName, pantry: [] });
 
                 await setPartyMenu({ code, drinkIds: [drink.id] });
+                await syncDrinkParties({ drink, partyId: code, included: true });
 
                 const created = {
                     id: code,
@@ -208,7 +248,7 @@ export function PartyListProvider({ children }) {
                 setCreatingParty(false);
             }
         },
-        [user]
+        [user, syncDrinkParties]
     );
 
     // l'host aggiorna la dispensa personale: le feste aperte (in
@@ -244,6 +284,7 @@ export function PartyListProvider({ children }) {
             creatingParty,
             toggleDrinkInParty,
             createPartyWithDrink,
+            syncDrinkParties,
             refresh,
             queuedOrdersCount,
             queuedOrderParties,
@@ -260,6 +301,7 @@ export function PartyListProvider({ children }) {
             user,
             toggleDrinkInParty,
             createPartyWithDrink,
+            syncDrinkParties,
             refresh,
             queuedOrdersCount,
             queuedOrderParties,
